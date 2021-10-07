@@ -9,7 +9,7 @@ services:
       - "5532:5432"
     env_file: .env
     volumes:
-      - carga_db:/var/lib/postgresql/data
+      - db:/var/lib/postgresql/data
 
   web:  
     container_name: aagesuite
@@ -26,5 +26,4 @@ services:
       - db
 
 volumes:
-  carga_db:
-    external: true
+  db:

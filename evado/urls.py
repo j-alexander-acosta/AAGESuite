@@ -62,8 +62,3 @@ urlpatterns = [
     url(r'^encuesta/configurar/universo/import/excel/$', views.import_eup_xls, name='persona_upload'),
     url(r'^encuesta/configurar/universo/delete/$', views.eliminar_todos_eup, name='eliminar_todos_eup'),
 ]
-
-# add static
-if settings.DEBUG:
-    from django.conf.urls.static import static
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

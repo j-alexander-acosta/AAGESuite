@@ -1,48 +1,36 @@
 import io
-import xlsxwriter
 import zipfile
+
+import xlsxwriter
 from django.conf import settings
-from django.http import Http404, HttpResponse
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.views.generic.detail import DetailView
-from django.shortcuts import render, get_object_or_404, redirect
-from .viewsAlexis import *
-from django.views.generic import TemplateView, ListView, DetailView, CreateView, UpdateView, DeleteView
-from carga_horaria.models import Periodo, Colegio, Plan
-from carga_horaria.formsDani import PeriodoForm, ColegioForm, PlanForm
-from django.urls import reverse_lazy, reverse
-from guardian.shortcuts import get_objects_for_user
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import UserPassesTestMixin
+from django.http import Http404, HttpResponse
+from django.shortcuts import get_object_or_404
 from guardian.shortcuts import assign_perm
 from guardian.shortcuts import remove_perm
-from wkhtmltopdf.views import PDFTemplateResponse, PDFTemplateView
-from wkhtmltopdf.views import PDFTemplateView
-from .models import Nivel
-from .models import Profesor
-from .models import Asistente
-from .models import Periodo
-from .models import Asignacion
-from .models import AsignacionExtra
-from .models import AsignacionNoAula
-from .models import Colegio
-from .forms import AsignacionForm
-from .forms import AsignacionUpdateForm
-from .forms import AsignacionFUAForm
-from .forms import AsignacionNoAulaFUAForm
-from .forms import AsignacionFUAUpdateForm
-from .forms import AsignacionNoAulaFUAUpdateForm
+from wkhtmltopdf.views import PDFTemplateResponse
+
+from carga_horaria.formsDani import PeriodoForm, ColegioForm, PlanForm
+from carga_horaria.models import Plan
+from . import models
+from .forms import AsignacionAsistenteForm
 from .forms import AsignacionExtraForm
 from .forms import AsignacionExtraUpdateForm
+from .forms import AsignacionFUAForm
+from .forms import AsignacionForm
+from .forms import AsignacionNoAulaFUAForm
 from .forms import AsignacionNoAulaForm
 from .forms import AsignacionNoAulaUpdateForm
-from .models import AsignacionAsistente
-from .forms import AsignacionAsistenteForm
+from .forms import AsignacionUpdateForm
 from .forms import AssignPermForm
 from .formsDani import PlantillaPlanForm
-from django.http import FileResponse
-from . import models
-from django.db.models import Q
+from .models import Asignacion
+from .models import AsignacionAsistente
+from .models import AsignacionExtra
+from .models import AsignacionNoAula
+from .viewsAlexis import *
 
 
 @login_required
