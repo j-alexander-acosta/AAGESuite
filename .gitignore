@@ -63,6 +63,9 @@ target/
 # Media files for development
 media/
 
+# Media files for development
+/static/
+
 /.idea/
 /.settings/
 .pydevproject
@@ -72,12 +75,7 @@ media/
 
 .make*
 .vagrant*
-
-# Estilos 
-
-/.static
 *.dump
 docker-compose.yml
-static
 .vscode
 .env

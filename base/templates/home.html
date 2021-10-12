@@ -1,0 +1,80 @@
+{% extends 'base/base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+    <div class="row mt-5">
+        <div class="col-md-3" style="align-self: center">
+            <a href="https://aage.cl" target="_blank">
+                <img src="{% static 'base/img/AAGE300.png' %}" width="300" alt="">
+            </a>
+        </div>
+        <div class="col-md-9 row">
+            {% if request.user.perfilusuario.es_admin or request.user.is_staff %}
+                <div class="col-md-4 text-center my-3">
+                    <a href="{% url 'rrhh:home_rrhh' %}">
+                        <img src="{% static 'base/img/Gestión-del-Talento-Humano-Personalizado.png' %}" height="80" alt="">
+                        <h4 class="font-black-normal text-center">Recursos Humanos</h4>
+                    </a>
+                </div>
+            {% endif %}
+
+            <div class="col-md-4 text-center my-3">
+                <a href="{% url 'carga-horaria:home' %}">
+                    <img src="{% static 'base/img/Carga-Horaria-Personalizado.png' %}" height="80" alt="">
+                    <h4 class="font-black-normal text-center">Carga Horaria</h4>
+                </a>
+            </div>
+
+            <div class="col-md-4 text-center my-3">
+                <a href="https://ac.unach.cl/" target="_blank">
+                    <img src="{% static 'base/img/Ciclos-de-Calidad-Personalizado.png' %}" height="80" alt="">
+                    <h4 class="font-black-normal text-center">Ciclos de Calidad</h4>
+                </a>
+            </div>
+
+            {% if request.user.perfilusuario.es_director or request.user.is_staff %}
+                <div class="col-md-4 text-center my-3">
+                    <a href="{% url 'evado:home_evado' %}">
+                        <img src="{% static 'base/img/Evaluación-Docente-Personalizado.png' %}" height="80" alt="">
+                        <h4 class="font-black-normal text-center">Evaluación Docente</h4>
+                    </a>
+                </div>
+            {% endif %}
+
+            <div class="col-md-4 text-center my-3">
+                <a href="javascript:void(0);">
+                    <img src="{% static 'base/img/Evaluación-de-los-Aprendizajes-Personalizado.png' %}" height="80" alt="">
+                    <h4 class="font-black-normal text-center">Evaluación Aprendizajes</h4>
+                </a>
+            </div>
+
+            <div class="col-md-4 text-center my-3">
+                <a href="https://app.powerbi.com/?noSignUpCheck=1&pbi_source=weblandingsignin" target="blank">
+                    <img src="{% static 'base/img/PowerBi2.png' %}" height="80" alt="">
+                    <h4 class="font-black-normal text-center">Power Bi</h4>
+                </a>
+            </div>
+
+            <div class="col-md-4 text-center my-3">
+                <a href="https://www.educacionadventista.com/" target="blank">
+                    <img src="{% static 'base/img/logotipo4.png' %}" height="80" alt="">
+                    <h4 class="font-black-normal text-center">Portal Adventista</h4>
+                </a>
+            </div>
+
+            <div class="col-md-4 text-center my-3">
+                <a href="https://aage.cl" target="blank">
+                    <img src="{% static 'base/img/logotipo4.png' %}" height="80" alt="">
+                    <h4 class="font-black-normal text-center">AAGE</h4>
+                </a>
+            </div>
+
+            <div class="col-md-4 text-center my-3">
+                <a href="https://unach.cl" target="blank">
+                    <img src="{% static 'base/img/logotipo4.png' %}" height="80" alt="">
+                    <h4 class="font-black-normal text-center">UnACh</h4>
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -158,61 +158,59 @@
                             <div class="p-2">
                                 <h4 class="text-center">Aplicaciones</h4>
                                 <div class="row no-gutters">
-                                    <div class="col">
-                                        <a class="dropdown-icon-item" href="{% url 'rrhh:home_rrhh' %}">
-                                            <img src="{% static 'base/img/Gestión-del-Talento-Humano-Personalizado.png' %}" alt="Recursos Humanos">
-                                            <p class="mb-0 mt-1 font-12 text-muted" style="line-height: 14px">Recursos Humanos</p>
-                                        </a>
-                                    </div>
-                                    <div class="col">
+                                    {% if request.user.perfilusuario.es_admin or request.user.is_staff %}
+                                        <div class="col-md-4">
+                                            <a class="dropdown-icon-item" href="{% url 'rrhh:home_rrhh' %}">
+                                                <img src="{% static 'base/img/Gestión-del-Talento-Humano-Personalizado.png' %}" alt="Recursos Humanos">
+                                                <p class="mb-0 mt-1 font-12 text-muted" style="line-height: 14px">Recursos Humanos</p>
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                    <div class="col-md-4">
                                         <a class="dropdown-icon-item" href="{% url 'carga-horaria:home' %}">
                                             <img src="{% static 'base/img/Carga-Horaria-Personalizado.png' %}" alt="Carga Horaria">
                                             <p class="mb-0 mt-1 mx-2 font-12 text-muted" style="line-height: 14px;">Carga Horaria</p>
                                         </a>
                                     </div>
-                                    <div class="col">
+                                    <div class="col-md-4">
                                         <a class="dropdown-icon-item" href="https://ac.unach.cl/" target="_blank">
                                             <img src="{% static 'base/img/Ciclos-de-Calidad-Personalizado.png' %}" alt="Ciclos de Calidad">
                                             <p class="mb-0 mt-1 mx-2 font-12 text-muted" style="line-height: 14px">Ciclos de Calidad</p>
                                         </a>
                                     </div>
-                                </div>
-
-                                <div class="row no-gutters">
-                                    <div class="col">
-                                        <a class="dropdown-icon-item" href="{% url 'evado:home_evado' %}">
-                                            <img src="{% static 'base/img/Evaluación-Docente-Personalizado.png' %}" alt="Evaluación Docente">
-                                            <p class="mb-0 mt-1 font-12 text-muted" style="line-height: 14px">Evaluación Docente</p>
-                                        </a>
-                                    </div>
-                                    <div class="col">
-                                        <a class="dropdown-icon-item" href="#">
+                                    {% if request.user.perfilusuario.es_director or request.user.is_staff %}
+                                        <div class="col-md-4">
+                                            <a class="dropdown-icon-item" href="{% url 'evado:home_evado' %}">
+                                                <img src="{% static 'base/img/Evaluación-Docente-Personalizado.png' %}" alt="Evaluación Docente">
+                                                <p class="mb-0 mt-1 font-12 text-muted" style="line-height: 14px">Evaluación Docente</p>
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                    <div class="col-md-4">
+                                        <a class="dropdown-icon-item" href="javascript:void(0);">
                                             <img src="{% static 'base/img/Evaluación-de-los-Aprendizajes-Personalizado.png' %}" alt="Evaluación de Aprendizajes">
                                             <p class="mb-0 mt-1 font-12 text-muted" style="line-height: 14px">Evaluación de Aprendizajes</p>
                                         </a>
                                     </div>
-                                    <div class="col">
+                                    <div class="col-md-4">
                                         <a class="dropdown-icon-item" href="https://app.powerbi.com/?noSignUpCheck=1&pbi_source=weblandingsignin" target="_blank">
                                             <img src="{% static 'base/img/PowerBi2.png' %}" alt="Power bi">
                                             <p class="mb-0 mt-1 font-12 text-muted" style="line-height: 14px">Power Bi</p>
                                         </a>
                                     </div>
-                                </div>
-
-                                <div class="row no-gutters">
-                                    <div class="col">
+                                    <div class="col-md-4">
                                         <a class="dropdown-icon-item" href="https://www.educacionadventista.com/" target="blank">
                                             <img src="{% static 'base/img/logotipo4.png' %}" alt="Portal Adventista">
                                             <p class="mb-0 mt-1 mx-1 font-12 text-muted" style="line-height: 14px">Portal Adventista</p>
                                         </a>
                                     </div>
-                                    <div class="col">
+                                    <div class="col-md-4">
                                         <a class="dropdown-icon-item" href="https://aage.cl" target="_blank">
                                             <img src="{% static 'base/img/logotipo4.png' %}" alt="AAGE">
                                             <p class="mb-0 mt-1 font-12 text-muted" style="line-height: 14px">AAGE</p>
                                         </a>
                                     </div>
-                                    <div class="col">
+                                    <div class="col-md-4">
                                         <a class="dropdown-icon-item" href="https://unach.cl" target="blank">
                                             <img src="{% static 'base/img/logotipo4.png' %}" alt="UnACh">
                                             <p class="mb-0 mt-1 font-12 text-muted" style="line-height: 14px">UnACh</p>

@@ -49,12 +49,6 @@ def login_view(request):
                 messages.WARNING,
                 u'Error en su contraseña o nombre de usuario, vuelva a intentarlo.'
             )
-    else:
-        messages.add_message(
-            request,
-            messages.INFO,
-            'Bienvenido!'
-        )
 
     return render(request, 'registration/login2.html')
 

@@ -7,16 +7,19 @@
 
 {% block content %}
 
-    <div class="error-page">
-        <h2 class="headline text-info"> 404 </h2>
-        <img src="{% static 'base/img/sad.png' %}">
-        <div class="error-content">
-            <h3><i class="fa fa-warning text-yellow"></i> Oops! Página no encontrada.</h3>
-            <p>
-                No hemos podido encontrar la página que estabas buscando.
-                Mientras, puedes  <a href='/'>retornar a la pantalla de inicio</a>
-            </p>
-        </div><!-- /.error-content -->
-    </div><!-- /.error-page -->
+    <div class="row justify-content-center">
+        <div class="col-lg-4">
+            <div class="text-center">
+                <img src="{% static 'assets/images/file-searching.svg' %}" height="90" alt="File not found Image">
+
+                <h1 class="text-error mt-4">404</h1>
+                <h4 class="text-uppercase text-danger mt-3">Página no encontrada</h4>
+                <p class="text-muted mt-3">Lo sentimos, la página que usted esta buscando no existe...
+                    Para mayor información, comuniquese con el soporte</p>
+
+                <a class="btn btn-info mt-3" href="{{ request.META.HTTP_REFERER }}"><i class="mdi mdi-reply"></i> Volver a donde estaba</a>
+            </div> <!-- end /.text-center-->
+        </div> <!-- end col-->
+    </div>
 
 {% endblock %}
