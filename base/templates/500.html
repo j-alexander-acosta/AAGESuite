@@ -1,22 +1,63 @@
-{% extends 'base/base.html'%}
 {% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <title>Error 500 | Suite AAGE</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta content="A fully featured admin theme which can be used to build CRM, CMS, etc." name="description" />
+        <meta content="Coderthemes" name="author" />
+        <!-- App favicon -->
+        <link rel="shortcut icon" href="{% static 'base/img/logo-icon.png' %}">
 
-{% block title_page %}
-    Error 500
-{% endblock %}
+        <!-- App css -->
+        <link href="{% static 'assets/css/icons.min.css' %}" rel="stylesheet" type="text/css" />
+        <link href="{% static 'assets/css/app-creative.min.css' %}" rel="stylesheet" type="text/css" id="light-style" />
+        <link href="{% static 'assets/css/app-creative-dark.min.css' %}" rel="stylesheet" type="text/css" id="dark-style" />
 
-{% block content %}
+    </head>
 
-    <div class="error-page">
-        <h2 class="headline text-info"> 500</h2>
-         <img src="{% static 'base/img/sad.png' %}">
-        <div class="error-content">
-            <h3><i class="fa fa-warning text-yellow"></i> Oops! Algo ha ido mal.</h3>
-            <p>
-                Estamos trabajando para dar una pronta solución.
-                Mientras tanto, puedes <a href='/'> retornar a la página de inicio</a>.
-            </p>
-        </div><!-- /.error-content -->
-    </div><!-- /.error-page -->
+    <body class="authentication-bg" data-layout-config='{"darkMode":false}'>
 
-{% endblock %}
+        <div class="account-pages mt-5 mb-5">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-lg-5">
+                        <div class="card">
+                            <!-- Logo -->
+{#                            <div class="card-header pt-4 pb-4 text-center bg-primary">#}
+{#                                <a href="index.html">#}
+{#                                    <span><img src="assets/images/logo.png" alt="" height="18"></span>#}
+{#                                </a>#}
+{#                            </div>#}
+                            
+                            <div class="card-body p-4">
+
+                                <div class="text-center">
+                                    <img src="{% static 'assets/images/startman.svg' %}" height="120" alt="File not found Image">
+
+                                    <h1 class="text-error mt-4">500</h1>
+                                    <h4 class="text-uppercase text-danger mt-3">Error interno del sistema</h4>
+                                    <p class="text-muted mt-3">Ha ocurrido un error inesperado, por favor recargue la página,
+                                        si el problema persiste, comuníquese con el soporte</p>
+                                    <a class="btn btn-info mt-3" href="{{ request.META.HTTP_REFERER }}"><i class="mdi mdi-reply"></i> Volver atrás</a>
+                                </div>
+
+                            </div> <!-- end card-body-->
+                        </div>
+                        <!-- end card-->
+                        
+                    </div> <!-- end col -->
+                </div>
+                <!-- end row -->
+            </div>
+            <!-- end container -->
+        </div>
+        <!-- end page -->
+
+        <!-- bundle -->
+        <script src="{% static 'assets/js/vendor.min.js' %}"></script>
+        <script src="{% static 'assets/js/app.min.js' %}"></script>
+        
+    </body>
+</html>

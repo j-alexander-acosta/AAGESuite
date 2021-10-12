@@ -17,56 +17,56 @@
 {% endblock %}
 
 {% block content %}
-<div class="card">
-    <div class="card-header">
-        <h4 class="card-title">Combinar Asignatura Plan Diferenciado
-        </h4>
-        <h5>Encontramos otra instancia de esta asignatura</h5>
-    </div>
-    <div class="card-body">
-      <p>Elija con qué instancia <strong>combinar</strong>:</p>
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">Combinar Asignatura Plan Diferenciado
+            </h4>
+            <h5>Encontramos otra instancia de esta asignatura</h5>
+        </div>
+        <div class="card-body">
+            <p>Elija con qué instancia <strong>combinar</strong>:</p>
             <table class="table">
-              <thead>
+                <thead>
                 <tr>
-                <th>Asignatura</th>
-                <th>Cursos a los que pertenece</th>
-                <th>Profesores asignados</th>
-                <th>Acción</th>
+                    <th>Asignatura</th>
+                    <th>Cursos a los que pertenece</th>
+                    <th>Profesores asignados</th>
+                    <th>Acción</th>
                 </tr>
-              </thead>
-              <tbody>
-      {% for aa in candidatas %}
-      <tr>
-        <td><strong>{{ aa }}</strong>
-        </td>
-        <td>{% for periodo in aa.periodos.all %}{{ periodo }}{% endfor %}
-        </td>
-        <td>{% if aa.profesores %}{% for pp in aa.profesores %}{{ pp.nombre }} {% endfor %}{% else %}Ninguno{% endif %}</td>
-        <td>
-        <form action="{% url 'carga-horaria:asignatura_merge' object.pk aa.pk %}" class="form-horizontal" method="post">
-          {% csrf_token %}
-          <button type="submit" value="{{ aa.pk }}" class="btn btn-outline-success">Combinar</button>
-        </form>
-        </td>
-      </tr>
-              </tbody>
-        {% endfor %}
+                </thead>
+                <tbody>
+                {% for aa in candidatas %}
+                    <tr>
+                        <td><strong>{{ aa }}</strong>
+                        </td>
+                        <td>{% for periodo in aa.periodos.all %}{{ periodo }}{% endfor %}
+                        </td>
+                        <td>{% if aa.profesores %}{% for pp in aa.profesores %}{{ pp.nombre }} {% endfor %}{% else %}Ninguno{% endif %}</td>
+                        <td>
+                            <form action="{% url 'carga-horaria:asignatura_merge' object.pk aa.pk %}" class="form-horizontal" method="post">
+                                {% csrf_token %}
+                                <button type="submit" value="{{ aa.pk }}" class="btn btn-outline-success">Combinar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                {% endfor %}
             </table>
-      <p>Si desea crear una <strong>nueva instancia</strong> en lugar de combinar con una existente:</p>
-        <form action="{% url 'carga-horaria:asignatura_dif__nuevo' object.pk %}" class="form-horizontal" method="post">
-            {% csrf_token %}
-            <input type="hidden" name="can_confirm" value="jel llea">
-            <input type="hidden" name="asignatura" value="{{ candidatas.first.nombre }}">
-            <div class="form-group">
-                <div class="col-sm-10 col-sm-offset-2">
-                  <button type="submit" value="{{ aa.pk }}" class="btn btn-outline-warning">Crear Nueva Asignatura</button>
-                    <a href="{{ request.META.HTTP_REFERER }}"
-                    role="button" class="btn btn-outline-primary">
-                        Volver
-                    </a>
+            <p>Si desea crear una <strong>nueva instancia</strong> en lugar de combinar con una existente:</p>
+            <form action="{% url 'carga-horaria:asignatura_dif__nuevo' object.pk %}" class="form-horizontal" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="can_confirm" value="jel llea">
+                <input type="hidden" name="asignatura" value="{{ candidatas.first.nombre }}">
+                <div class="form-group">
+                    <div class="col-sm-10 col-sm-offset-2">
+                        <button type="submit" value="{{ aa.pk }}" class="btn btn-outline-warning">Crear Nueva Asignatura</button>
+                        <a href="{{ request.META.HTTP_REFERER }}"
+                           role="button" class="btn btn-outline-primary">
+                            Volver
+                        </a>
+                    </div>
                 </div>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
-</div>
 {% endblock %}
