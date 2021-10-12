@@ -1,7 +1,10 @@
 {% load staticfiles rrhh_utils %}
-
 <!DOCTYPE html>
-<html lang="en">
+{% if IE == 9 %}
+    <html class="ie9" lang="es">
+{% else %}
+    <html lang="es">
+{% endif %}
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -94,9 +97,9 @@
             </div>
             <div class="col-md-6">
                 <div class="text-md-right footer-links d-none d-md-block">
-                    <a href="http://aage.cl/#conocenos" target="blanck">Acerca de Nosotros</a>
-                    <a href="http://aage.cl/#contacto" target="blanck">Soporte</a>
-                    <a href="http://aage.cl/#contacto" target="blanck">Contáctenos</a>
+                    <a href="https://aage.cl/#conocenos" target="blanck">Acerca de Nosotros</a>
+                    <a href="https://aage.cl/#contacto" target="blanck">Soporte</a>
+                    <a href="https://aage.cl/#contacto" target="blanck">Contáctenos</a>
                 </div>
             </div>
         </div>
@@ -114,10 +117,10 @@
 
 {% block extra_js %}
 {% endblock %}
+
 <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-{% comment %}
-    <script src="../../../../assets/js/ie10-viewport-bug-workaround.js"></script>
-    {% endcomment %}
+{#    <script src="../../ie10-viewport-bug-workaround.js"></script>#}
+{#    <script src="{% static 'assets/js/ie10-viewport-bug-workaround.js' %}"></script>#}
 
 <script>
     $(function(i) {

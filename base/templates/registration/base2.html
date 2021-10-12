@@ -1,17 +1,10 @@
-{% load staticfiles %}
+{% load staticfiles rrhh_utils %}
 <!DOCTYPE html>
-<!--[if IE 9 ]><html class="ie9"><![endif]-->
-{#    <head>#}
-{#        <meta charset="utf-8">#}
-{#        <meta http-equiv="X-UA-Compatible" content="IE=edge">#}
-{#        <meta name="viewport" content="width=device-width, initial-scale=1">#}
-{#        <title>Login - AAGE</title>#}
-{#        <!-- Vendor CSS -->#}
-{##}
-{#        <link href="{% static 'base/css/bootstrap.min.css'%}" rel="stylesheet">#}
-{#        <link rel="stylesheet" href="{% static 'base/css/base.css' %}">#}
-{##}
-{#    </head>#}
+{% if IE == 9 %}
+    <html class="ie9" lang="es">
+{% else %}
+    <html lang="es">
+{% endif %}
 <head>
     <meta charset="utf-8" />
     {% block title %}{% endblock %}
@@ -25,6 +18,7 @@
     <link href="{% static 'assets/css/icons.min.css' %}" rel="stylesheet" type="text/css" />
     <link href="{% static 'assets/css/app-creative.min.css' %}" rel="stylesheet" type="text/css" id="light-style" />
     <link href="{% static 'assets/css/app-creative-dark.min.css' %}" rel="stylesheet" type="text/css" id="dark-style" />
+    <title></title>
 
 </head>
 <body class="authentication-bg pb-0" data-layout-config='{"darkMode":false}'>
@@ -51,11 +45,11 @@
     <div class="auth-fluid-right text-center">
         <div class="auth-user-testimonial">
             <h2 class="mb-3">Bienvenido!</h2>
-{#            <p class="lead">#}
-{#                <i class="mdi mdi-format-quote-open"></i>#}
-{#                Sistema integrado para el acompañamiento de la gestión educativa#}
-{#                <i class="mdi mdi-format-quote-close"></i>#}
-{#            </p>#}
+            {#            <p class="lead">#}
+            {#                <i class="mdi mdi-format-quote-open"></i>#}
+            {#                Sistema integrado para el acompañamiento de la gestión educativa#}
+            {#                <i class="mdi mdi-format-quote-close"></i>#}
+            {#            </p>#}
             <p class="lead">
                 AAGE - Universidad Adventista de Chile
             </p>
@@ -67,6 +61,30 @@
 <!-- bundle -->
 <script src="{% static 'assets/js/vendor.min.js' %}"></script>
 <script src="{% static 'assets/js/app.min.js' %}"></script>
+
+<script>
+    $(function(i) {
+        {% if messages %}
+            {% for message in messages %}
+                i.NotificationApp.send(
+                    {% if message.tags|get_word:'1' == 'info' %}
+                        "Información importante",
+                    {% elif message.tags|get_word:'1' == 'success' %}
+                        "Excelente",
+                    {% elif message.tags|get_word:'1' == 'warning' %}
+                        "Advertencia",
+                    {% elif message.tags|get_word:'1' == 'error' %}
+                        "Algo ha salido mal",
+                    {% endif %}
+                    "{{ message.message|safe }}",
+                    "top-right",
+                    "rgba(0,0,0,0.2)",
+                    "{{ message.tags|get_word:'1' }}"
+                )
+            {% endfor %}
+        {% endif %}
+    });
+</script>
 
 </body>
 </html>
