@@ -24,6 +24,7 @@ django-wkhtmltopdf==3.3.0
 djangorestframework==3.12.4
 docutils==0.17.1
 et-xmlfile==1.1.0
+gunicorn==20.1.0
 MarkupPy==1.14
 numpy==1.21.2
 odfpy==1.4.1
