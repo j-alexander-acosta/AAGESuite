@@ -56,6 +56,11 @@ urlpatterns = [
         name='change_password'
     ),
     url(
+        r'^cambiar_perfil_usuario/(?P<id_usuario>\d+)/$',
+        views.cambiar_perfil_usuario,
+        name='cambiar_perfil_usuario'
+    ),
+    url(
         r'^perfiles/$',
         views.PerfilListView.as_view(),
         name='perfiles'

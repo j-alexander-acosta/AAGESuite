@@ -489,7 +489,7 @@ def tomar_encuesta(request, hash):
         if ultima_pregunta and not request_page:
             for index, pregunta in enumerate(preguntas):
                 if pregunta == ultima_pregunta:
-                    page = index
+                    page = index - 1 if index > 0 else index
 
         context['pregunta'] = preguntas[page]
         context['total_preguntas'] = preguntas.count()

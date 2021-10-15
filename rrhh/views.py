@@ -1,4 +1,5 @@
 from django.http import FileResponse, HttpResponse
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin   
 from django.contrib.auth.decorators import login_required
 from django.views.generic import ListView, CreateView, UpdateView, DetailView, DeleteView
@@ -12,7 +13,7 @@ from rrhh.models.base import TipoLicencia, DOCUMENTO, Documento
 from rrhh.models.persona import Persona, Funcionario
 from rrhh.models.entidad import Entrevista, Vacacion, Finiquito, Licencia, Permiso, Contrato, EstadoContratacion
 from rrhh.models.entidad import Solicitud, EstadoSolicitud
-from rrhh.forms import VacacionTipoFuncionarioColegioForm, VacacionForm, ContratoForm, FuncionarioForm, EntrevistaForm
+from rrhh.forms import VacacionTipoFuncionarioColegioForm, VacacionForm, ContratoForm, FuncionarioForm, EntrevistaForm, AsignarUsuarioPersonaForm
 from rrhh.forms import PermisoTipoFuncionarioColegioForm, PermisoForm, SolicitudForm, EstadoSolicitudForm, DocumentoForm, AgregarDocumentoForm
 from rrhh.forms import LicenciaTipoFuncionarioColegioForm, LicenciaForm, PersonaForm, FiniquitoForm, EstadoContratacionForm
 from rrhh.pdf.descuentodiezmo import DescuentoDiezmo
@@ -95,6 +96,18 @@ def persona_detail(request, pk_persona):
     )
 
     context['object'] = persona
+    context['asignar_up_form'] = AsignarUsuarioPersonaForm()
+
+    if request.method == 'POST':
+        form = AsignarUsuarioPersonaForm(request.POST)
+        if form.is_valid():
+            usuario = form.cleaned_data.get('usuario')
+            persona.usuario = usuario
+            persona.save()
+            messages.add_message(request, messages.SUCCESS, 'Usuario asignado satisfactoriamente')
+        else:
+            context['asignar_up_form'] = form
+            messages.add_message(request, messages.WARNING, 'Porfavor, complete la información requerida')
 
     return render(
         request,
@@ -171,6 +184,7 @@ def crear_funcionario(request, id_persona):
             return redirect('rrhh:persona', persona.id)
         else:
             # Formulario con errores
+            messages.add_message(request, messages.WARNING, 'Porfavor, complete la información requerida')
             context['message'] = u"Complete la información requerida"
             context['form'] = form
 

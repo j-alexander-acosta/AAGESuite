@@ -69,17 +69,6 @@
 
         {{ encuesta.descripcion|safe }}
 
-        {% if messages %}
-            <ul class="messages">
-                {% for message in messages %}
-                    <li{% if message.tags %} {% if message.tags == "error" %} class="alert alert-danger volatile" {% else %} class="alert alert-{{ message.tags }} volatile" {% endif %} {% endif %}>
-                        {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}<strong> Importante: </strong> {% endif %}
-                        {{ message }}
-                    </li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-
         <form method="POST">
             {% csrf_token %}
 

@@ -27,7 +27,7 @@
     </div>
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-striped">
+            <table id="basic-datatable" class="table table-striped">
                 <thead>
                 <tr>
                     <th><i class="uil-user"></i> Persona </th>
@@ -92,13 +92,6 @@
             </table>
         </div>
     </div>
-
-    <div class="card-footer">
-        <div align="center">
-            {% bootstrap_paginate page_obj range=5 %}
-        </div>
-    </div>
-
 </div>
 
 {% endblock content  %}

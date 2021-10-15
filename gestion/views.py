@@ -5,12 +5,12 @@ from django.contrib.auth.models import User
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, CreateView, UpdateView, DetailView, DeleteView
 from django.urls import reverse_lazy
+
+from rrhh.models import PerfilUsuario
 from rrhh.models.base import Perfil, Banco, AFP, Isapre, Funcion, TipoLicencia, TipoDocumento, TipoTitulo, AreaTitulo
 from rrhh.models.base import Especialidad, Mencion
 from rrhh.models.entidad import Entidad
-from gestion.forms import EntidadForm, UserForm, UserUpdateForm, PerfilForm, BancoForm
-from gestion.forms import AFPForm, IsapreForm, FuncionForm, TipoLicenciaForm, TipoDocumentoForm, TipoTituloForm
-from gestion.forms import AreaTituloForm, EspecialidadForm, MencionForm
+from gestion.forms import EntidadForm, UserForm, CambiarPerfilUsuarioForm
 
 
 class EntidadListView(LoginRequiredMixin, ListView):
@@ -66,6 +66,11 @@ class UserListView(LoginRequiredMixin, ListView):
     search_fields = ['username', 'first_name', 'last_name', 'email']
     paginate_by = 6
 
+    def get_context_data(self, *args, **kwargs):
+        context = super(UserListView, self).get_context_data(*args, **kwargs)
+        context['form'] = CambiarPerfilUsuarioForm()
+        return context
+
 
 @login_required()
 def crear_usuario(request):
@@ -86,7 +91,13 @@ class UserUpdateView(LoginRequiredMixin, UpdateView):
         Permite la edición de un usuario.
     """
     model = User
-    form_class = UserUpdateForm
+    fields = [
+        'username',
+        'first_name',
+        'last_name',
+        'email',
+        'is_active',
+    ]
     template_name = 'gestion/usuario/nuevo_usuario.html'
     success_message = u"Usuario %(username)s actualizado satisfactoriamente."
     success_url = reverse_lazy('gestion:usuarios')
@@ -135,6 +146,37 @@ def change_password(request, id_usuario):
     )
 
 
+@login_required()
+def cambiar_perfil_usuario(request, id_usuario):
+    usuario = get_object_or_404(
+        User,
+        id=id_usuario
+    )
+
+    if request.method == 'POST':
+        form = CambiarPerfilUsuarioForm(request.POST)
+        if form.is_valid():
+            perfil = form.cleaned_data.get('perfil')
+            nivel_acceso = form.cleaned_data.get('nivel_acceso')
+            try:
+                pu = usuario.perfilusuario
+                pu.perfil = perfil
+                pu.nivel_acceso = nivel_acceso
+                pu.save()
+                messages.success(request, u"El perfil de usuario para {}, ha sido cambiado con éxito".format(usuario))
+            except:
+                PerfilUsuario.objects.create(
+                    usuario=usuario,
+                    perfil=perfil,
+                    nivel_acceso=nivel_acceso
+                )
+                messages.success(request, u"El perfil de usuario para {}, ha sido creado con éxito".format(usuario))
+        else:
+            messages.warning(request, u"Debe ingresar correctamente la información")
+
+    return redirect('gestion:usuarios')
+
+
 class PerfilListView(LoginRequiredMixin, ListView):
     model = Perfil
     template_name = 'gestion/perfil/listado_perfil.html'
@@ -149,7 +191,7 @@ class PerfilDetailView(LoginRequiredMixin, DetailView):
 
 class PerfilCreateView(LoginRequiredMixin, CreateView):
     model = Perfil
-    form_class = PerfilForm
+    fields = '__all__'
     template_name = 'gestion/perfil/nuevo_perfil.html'
 
     def get_success_url(self):
@@ -163,7 +205,7 @@ class PerfilCreateView(LoginRequiredMixin, CreateView):
 
 class PerfilUpdateView(LoginRequiredMixin, UpdateView):
     model = Perfil
-    form_class = PerfilForm
+    fields = '__all__'
     template_name = 'gestion/perfil/nuevo_perfil.html'
 
     def get_success_url(self):
@@ -197,7 +239,7 @@ class BancoDetailView(LoginRequiredMixin, DetailView):
 
 class BancoCreateView(LoginRequiredMixin, CreateView):
     model = Banco
-    form_class = BancoForm
+    fields = '__all__'
     template_name = 'gestion/banco/nuevo_banco.html'
 
     def get_success_url(self):
@@ -211,7 +253,7 @@ class BancoCreateView(LoginRequiredMixin, CreateView):
 
 class BancoUpdateView(LoginRequiredMixin, UpdateView):
     model = Banco
-    form_class = BancoForm
+    fields = '__all__'
     template_name = 'gestion/banco/nuevo_banco.html'
 
     def get_success_url(self):
@@ -245,7 +287,7 @@ class AFPDetailView(LoginRequiredMixin, DetailView):
 
 class AFPCreateView(LoginRequiredMixin, CreateView):
     model = AFP
-    form_class = AFPForm
+    fields = '__all__'
     template_name = 'gestion/afp/nueva_afp.html'
 
     def get_success_url(self):
@@ -259,7 +301,7 @@ class AFPCreateView(LoginRequiredMixin, CreateView):
 
 class AFPUpdateView(LoginRequiredMixin, UpdateView):
     model = AFP
-    form_class = AFPForm
+    fields = '__all__'
     template_name = 'gestion/afp/nueva_afp.html'
 
     def get_success_url(self):
@@ -293,7 +335,7 @@ class IsapreDetailView(LoginRequiredMixin, DetailView):
 
 class IsapreCreateView(LoginRequiredMixin, CreateView):
     model = Isapre
-    form_class = IsapreForm
+    fields = '__all__'
     template_name = 'gestion/isapre/nueva_isapre.html'
 
     def get_success_url(self):
@@ -307,7 +349,7 @@ class IsapreCreateView(LoginRequiredMixin, CreateView):
 
 class IsapreUpdateView(LoginRequiredMixin, UpdateView):
     model = Isapre
-    form_class = IsapreForm
+    fields = '__all__'
     template_name = 'gestion/isapre/nueva_isapre.html'
 
     def get_success_url(self):
@@ -341,7 +383,7 @@ class FuncionDetailView(LoginRequiredMixin, DetailView):
 
 class FuncionCreateView(LoginRequiredMixin, CreateView):
     model = Funcion
-    form_class = FuncionForm
+    fields = '__all__'
     template_name = 'gestion/funcion/nueva_funcion.html'
 
     def get_success_url(self):
@@ -355,7 +397,7 @@ class FuncionCreateView(LoginRequiredMixin, CreateView):
 
 class FuncionUpdateView(LoginRequiredMixin, UpdateView):
     model = Funcion
-    form_class = FuncionForm
+    fields = '__all__'
     template_name = 'gestion/funcion/nueva_funcion.html'
 
     def get_success_url(self):
@@ -389,7 +431,7 @@ class TipoLicenciaDetailView(LoginRequiredMixin, DetailView):
 
 class TipoLicenciaCreateView(LoginRequiredMixin, CreateView):
     model = TipoLicencia
-    form_class = TipoLicenciaForm
+    fields = '__all__'
     template_name = 'gestion/tipo_licencia/nuevo_tipolicencia.html'
 
     def get_success_url(self):
@@ -403,7 +445,7 @@ class TipoLicenciaCreateView(LoginRequiredMixin, CreateView):
 
 class TipoLicenciaUpdateView(LoginRequiredMixin, UpdateView):
     model = TipoLicencia
-    form_class = TipoLicenciaForm
+    fields = '__all__'
     template_name = 'gestion/tipo_licencia/nuevo_tipolicencia.html'
 
     def get_success_url(self):
@@ -437,7 +479,7 @@ class TipoDocumentoDetailView(LoginRequiredMixin, DetailView):
 
 class TipoDocumentoCreateView(LoginRequiredMixin, CreateView):
     model = TipoDocumento
-    form_class = TipoDocumentoForm
+    fields = '__all__'
     template_name = 'gestion/tipo_documento/nuevo_tipodocumento.html'
 
     def get_success_url(self):
@@ -451,7 +493,7 @@ class TipoDocumentoCreateView(LoginRequiredMixin, CreateView):
 
 class TipoDocumentoUpdateView(LoginRequiredMixin, UpdateView):
     model = TipoDocumento
-    form_class = TipoDocumentoForm
+    fields = '__all__'
     template_name = 'gestion/tipo_documento/nuevo_tipodocumento.html'
 
     def get_success_url(self):
@@ -485,7 +527,7 @@ class TipoTituloDetailView(LoginRequiredMixin, DetailView):
 
 class TipoTituloCreateView(LoginRequiredMixin, CreateView):
     model = TipoTitulo
-    form_class = TipoTituloForm
+    fields = '__all__'
     template_name = 'gestion/tipo_titulo/nuevo_tipotitulo.html'
 
     def get_success_url(self):
@@ -499,7 +541,7 @@ class TipoTituloCreateView(LoginRequiredMixin, CreateView):
 
 class TipoTituloUpdateView(LoginRequiredMixin, UpdateView):
     model = TipoTitulo
-    form_class = TipoTituloForm
+    fields = '__all__'
     template_name = 'gestion/tipo_titulo/nuevo_tipotitulo.html'
 
     def get_success_url(self):
@@ -533,7 +575,7 @@ class AreaTituloDetailView(LoginRequiredMixin, DetailView):
 
 class AreaTituloCreateView(LoginRequiredMixin, CreateView):
     model = AreaTitulo
-    form_class = AreaTituloForm
+    fields = '__all__'
     template_name = 'gestion/area_titulo/nuevo_areatitulo.html'
 
     def get_success_url(self):
@@ -547,7 +589,7 @@ class AreaTituloCreateView(LoginRequiredMixin, CreateView):
 
 class AreaTituloUpdateView(LoginRequiredMixin, UpdateView):
     model = AreaTitulo
-    form_class = AreaTituloForm
+    fields = '__all__'
     template_name = 'gestion/area_titulo/nuevo_areatitulo.html'
 
     def get_success_url(self):
@@ -581,7 +623,7 @@ class EspecialidadDetailView(LoginRequiredMixin, DetailView):
 
 class EspecialidadCreateView(LoginRequiredMixin, CreateView):
     model = Especialidad
-    form_class = EspecialidadForm
+    fields = '__all__'
     template_name = 'gestion/especialidad/nuevo_especialidad.html'
 
     def get_success_url(self):
@@ -595,7 +637,7 @@ class EspecialidadCreateView(LoginRequiredMixin, CreateView):
 
 class EspecialidadUpdateView(LoginRequiredMixin, UpdateView):
     model = Especialidad
-    form_class = EspecialidadForm
+    fields = '__all__'
     template_name = 'gestion/especialidad/nuevo_especialidad.html'
 
     def get_success_url(self):
@@ -629,7 +671,7 @@ class MencionDetailView(LoginRequiredMixin, DetailView):
 
 class MencionCreateView(LoginRequiredMixin, CreateView):
     model = Mencion
-    form_class = MencionForm
+    fields = '__all__'
     template_name = 'gestion/mencion/nuevo_mencion.html'
 
     def get_success_url(self):
@@ -643,7 +685,7 @@ class MencionCreateView(LoginRequiredMixin, CreateView):
 
 class MencionUpdateView(LoginRequiredMixin, UpdateView):
     model = Mencion
-    form_class = MencionForm
+    fields = '__all__'
     template_name = 'gestion/mencion/nuevo_mencion.html'
 
     def get_success_url(self):

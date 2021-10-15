@@ -1,6 +1,6 @@
 from django import forms
-from django.contrib import messages
 from django.db.models import Sum
+from django.contrib.auth.models import User
 from localflavor.cl.forms import CLRutField
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Div, Field, HTML
@@ -132,6 +132,7 @@ class PersonaForm(forms.ModelForm):
             raise forms.ValidationError(
                 u"Este campo es obligatorio"
             )
+        return direccion
 
     def clean_ciudad(self):
         ciudad = self.cleaned_data['ciudad']
@@ -148,6 +149,20 @@ class PersonaForm(forms.ModelForm):
                 u"El número debe ser de nueve dígitos"
             )
         return telefono
+
+
+class AsignarUsuarioPersonaForm(forms.Form):
+    usuarios_utilizados = Persona.objects.filter(usuario__isnull=False).values_list('usuario__id')
+    usuarios = User.objects.all().exclude(id__in=usuarios_utilizados)
+    usuario = forms.ModelChoiceField(
+        queryset=usuarios,
+        label="Usuario"
+    )
+
+    def __init__(self, *args, **kwargs):
+        super(AsignarUsuarioPersonaForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_tag = False
 
 
 class FuncionarioForm(forms.ModelForm):
@@ -248,6 +263,7 @@ class DocumentoForm(forms.ModelForm):
         self.helper = FormHelper()
         self.helper.form_tag = False
 
+
 class AgregarDocumentoForm(forms.ModelForm):
 
     class Meta:
@@ -272,6 +288,7 @@ class AgregarDocumentoForm(forms.ModelForm):
         self.fields['tipo_documento'].queryset = Documento.objects.filter(tipo_documento='otro')
         self.helper = FormHelper()
         self.helper.form_tag = False
+
 
 class VacacionForm(forms.ModelForm):
     class Meta:

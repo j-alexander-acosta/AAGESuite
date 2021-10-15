@@ -2,17 +2,17 @@
 {% load crispy_forms_tags staticfiles %}
 
 {% block title_page %}
-    Usuario - Nuevo
+    Usuario - {% if object %}Editar{% else %}Crear{% endif %}
 {% endblock %}
 
 {% block title %}
-    Crear Usuario
+    {% if object %}Editar{% else %}Crear{% endif %} Usuario
 {% endblock %}
 
 {% block breadcrumb %}
     <li class="breadcrumb-item"><a href="{% url 'home' %}">Suite AAGE</a></li>
     <li class="breadcrumb-item"><a href="{% url 'gestion:usuarios' %}">Usuarios</a></li>
-    <li class="breadcrumb-item active">Crear Usuario</li>
+    <li class="breadcrumb-item active">{% if object %}Editar{% else %}Crear{% endif %} Usuario</li>
 {% endblock %}
 
 {% block content %}
@@ -23,7 +23,7 @@
         <div class="card-body">
             <form class="form-horizontal" method="post" autocomplete="off">
                 {% csrf_token %}
-                {% crispy form %}
+                {{ form|crispy }}
                 <div class="form-group">
                     <div class="col-sm-10 col-sm-offset-2">
                         <button type="submit" class="btn btn-outline-success">Guardar</button>

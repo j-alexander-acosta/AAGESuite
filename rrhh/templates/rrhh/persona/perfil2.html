@@ -49,6 +49,14 @@
                         <p class="text-muted mb-2 font-13"><strong>Dirección :</strong> <span class="ml-2">{{ object.direccion }}{% if object.ciudad %}, {{ object.ciudad }}, {{ object.ciudad.comuna.region }}{% endif %}</span></p>
                         <p class="text-muted mb-2 font-13"><strong>Teléfono :</strong> <span class="ml-2">{{ object.telefono }}</span></p>
                         <p class="text-muted mb-2 font-13"><strong>Correo electrónico :</strong> <span class="ml-2">{{ object.email }}</span></p>
+                        {% if object.usuario %}
+                            <p class="text-muted mb-2 font-13"><strong>Usuario :</strong> <span class="ml-2">{{ object.usuario }}</span></p>
+                        {% elif request.user.perfilusuario.es_admin or request.user.is_staff %}
+                            <a role="button" href="#" class="btn btn-outline-info btn-sm" data-toggle="modal" data-target="#asignar_usuario">
+                                <i class="uil-user-plus"></i> Asignar Usuario
+                            </a>
+                        {% endif %}
+
                     </div>
 
                     <a role="button" href="{% url 'rrhh:persona__editar' object.pk %}"
@@ -180,244 +188,27 @@
         </div> <!-- end col -->
     </div>
 
-{% endblock content %}
+    <div class="modal fade" tabindex="-1" role="dialog" id="asignar_usuario">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form action="." method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Asignar usuario</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        {% crispy asignar_up_form %}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-outline-success">Asignar</button>
+                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cerrar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
-{#{% block content %}#}
-{#    <div class="container">#}
-{#        <div class="card" id="profile-main" style="min-height: 520px">#}
-{#            <div class="pm-overview c-overflow">#}
-{#                <div class="pmo-pic">#}
-{#                    <div class="p-relative">#}
-{#                        <a href="">#}
-{#                            {% if object.foto %}#}
-{#                                <img class="img-responsive" src="{{ object.foto}}" alt="{{ object.username }}">#}
-{#                            {% else %}#}
-{#                                <img class="img-responsive" src="{% static 'base/img/user.png' %}" alt="{{ object.username }}">#}
-{#                            {% endif %}#}
-{#                        </a>#}
-{#                    </div>#}
-{##}
-{#                    <div class="pmo-stat">#}
-{#                        <h5 class="m-0 c-white">{{ object.rut }}</h5>#}
-{#                        {{ object.get_full_name }}<br>#}
-{#                        <em>{{ object.profesion }}</em>#}
-{#                    </div>#}
-{#                    {% if object.clasificacion == 'Postulante' %}#}
-{#                        <div class="pmo-stat c-white" style="background-color: #ffc105">#}
-{#                            <h4>{{ object.clasificacion }}</h4>#}
-{#                        </div>#}
-{#                    {% elif object.clasificacion == 'Funcionario' %}#}
-{#                        <div class="pmo-stat c-white" style="background-color: #28a745">#}
-{#                            <h4>{{ object.clasificacion }}</h4>#}
-{#                        </div>#}
-{#                    {% else %}#}
-{#                        <div class="pmo-stat c-white" style="background-color: lightseagreen">#}
-{#                            <h4>{{ object.clasificacion }}</h4>#}
-{#                        </div>#}
-{#                    {% endif %}#}
-{#                </div>#}
-{#            </div>#}
-{##}
-{##}
-{#            <div class="pm-body clearfix m-l-5">#}
-{#                <br>#}
-{#                <ul class="nav nav-tabs nav-justified" id="myTab" role="tablist">#}
-{#                    <li class="nav-item" role="presentation">#}
-{#                        <a class="nav-link active" id="perfil-tab" data-toggle="tab" href="#perfil"#}
-{#                           role="tab" aria-controls="perfil" aria-selected="true">Perfil</a>#}
-{#                    </li>#}
-{#                    {% if object.funcionario %}#}
-{#                        <li class="nav-item" role="presentation">#}
-{#                            <a class="nav-link" id="profesional-tab" data-toggle="tab" href="#profesional"#}
-{#                               role="tab" aria-controls="profesional" aria-selected="false">Inf. Funcionario</a>#}
-{#                        </li>#}
-{#                    {% else %}#}
-{#                        <li class="nav-item" role="link">#}
-{#                            <a class="nav-link" href="{% url 'rrhh:funcionario__nuevo' object.id %}" role="tab">#}
-{#                                <i class="uil-plus"></i> Crear Funcionario#}
-{#                            </a>#}
-{#                        </li>#}
-{#                    {% endif %}#}
-{#                    {% if object.historial.union or object.historial.fundacion or object.historial.colegio %}#}
-{#                        <li class="nav-item" role="presentation">#}
-{#                            <a class="nav-link" id="historial-contrato-tab" data-toggle="tab" href="#historial-contrato"#}
-{#                               role="tab" aria-controls="ihstorial-contrato" aria-selected="false">Hitorial</a>#}
-{#                        </li>#}
-{#                    {% endif %}#}
-{#                </ul>#}
-{#                <div class="tab-content" id="myTabContent">#}
-{#                    <div class="tab-pane fade show active" id="perfil" role="tabpanel" aria-labelledby="perfil-tab">#}
-{#                        <div class="pmb-block">#}
-{#                            <div class="pmbb-body">#}
-{#                                <div class="pmbb-view">#}
-{#                                    <table class="table table-responsive">#}
-{#                                        <body>#}
-{#                                        <tr>#}
-{#                                            <th>Fecha de Nacimiento</th>#}
-{#                                            <td>{{ object.fecha_nacimiento }}</td>#}
-{#                                        </tr>#}
-{#                                        <tr>#}
-{#                                            <th>Genero</th>#}
-{#                                            <td>{{ object.genero }}</td>#}
-{#                                        </tr>#}
-{#                                        <tr>#}
-{#                                            <th>Nacionalidad</th>#}
-{#                                            <td>{{ object.nacionalidad|beauty_none }}</td>#}
-{#                                        </tr>#}
-{#                                        <tr>#}
-{#                                            <th>Estado Civil</th>#}
-{#                                            <td>{{ object.estado_civil|beauty_none }}</td>#}
-{#                                        </tr>#}
-{#                                        <tr>#}
-{#                                            <th>Religión</th>#}
-{#                                            <td>{{ object.religion|beauty_none }}</td>#}
-{#                                        </tr>#}
-{#                                        <tr>#}
-{#                                            <th>Dirección</th>#}
-{#                                            <td>{{ object.direccion }}</td>#}
-{#                                        </tr>#}
-{#                                        <tr>#}
-{#                                            <th>Teléfono</th>#}
-{#                                            <td>{{ object.telefono }}</td>#}
-{#                                        </tr>#}
-{#                                        <tr>#}
-{#                                            <th>Correo Electrónico</th>#}
-{#                                            <td>{{ object.email }}</td>#}
-{#                                        </tr>#}
-{#                                        </body>#}
-{#                                    </table>#}
-{#                                </div>#}
-{#                            </div>#}
-{#                        </div>#}
-{#                    </div>#}
-{#                    {% if object.funcionario %}#}
-{#                        <div class="tab-pane fade" id="profesional" role="tabpanel" aria-labelledby="profesional-tab">#}
-{#                            <div class="pmb-block">#}
-{#                                <div class="pmbb-body">#}
-{#                                    <div class="pmbb-view">#}
-{#                                        <table class="table table-responsive">#}
-{#                                            <body>#}
-{#                                            <tr>#}
-{#                                                <th>AFP</th>#}
-{#                                                <td>{{ object.funcionario.afp|beauty_none }}</td>#}
-{#                                            </tr>#}
-{#                                            <tr>#}
-{#                                                <th>Salud</th>#}
-{#                                                <td>{{ object.funcionario.get_salud_display|beauty_none }}</td>#}
-{#                                            </tr>#}
-{#                                            {% if object.funcionario.salud == 2 %}#}
-{#                                                <tr>#}
-{#                                                    <th>Isapre</th>#}
-{#                                                    <td>{{ object.funcionario.isapre|beauty_none }}</td>#}
-{#                                                </tr>#}
-{#                                            {% endif %}#}
-{#                                            <tr>#}
-{#                                                <th>Fecha de ingreso de Docente</th>#}
-{#                                                <td>{{ object.funcionario.fecha_ingreso_docente|beauty_none }}</td>#}
-{#                                            </tr>#}
-{#                                            <tr>#}
-{#                                                <th>Fecha de ingreso al SEA</th>#}
-{#                                                <td>{{ object.funcionario.fecha_ingreso_sea|beauty_none }}</td>#}
-{#                                            </tr>#}
-{#                                            <tr>#}
-{#                                                <th>Estado del Funcionario</th>#}
-{#                                                <td>{{ object.funcionario.get_estado_display }}</td>#}
-{#                                            </tr>#}
-{#                                            {% if object.estado == 2 %}#}
-{#                                                <tr>#}
-{#                                                    <th>Tipo de misionero</th>#}
-{#                                                    <td>{{ object.funcionario.get_tipo_misionero_display }}</td>#}
-{#                                                </tr>#}
-{#                                                <tr>#}
-{#                                                    <th>Puntos</th>#}
-{#                                                    <td>{{ object.funcionario.puntos }}</td>#}
-{#                                                </tr>#}
-{#                                            {% endif %}#}
-{#                                            </body>#}
-{#                                        </table>#}
-{#                                        <a role="button" class="btn btn-outline-info text-right" href="{% url 'rrhh:funcionario__editar' object.funcionario.pk %}"><i class="uil-edit"></i> Editar</a>#}
-{#                                    </div>#}
-{#                                </div>#}
-{#                            </div>#}
-{#                        </div>#}
-{#                    {% endif %}#}
-{#                    {% if object.historial %}#}
-{#                        <div class="tab-pane fade show active" id="historial-contrato" role="tabpanel" aria-labelledby="historial-contrato-tab">#}
-{#                            <div class="pmb-block">#}
-{#                                <div class="accordion" id="accordionExample">#}
-{#                                    {% for contrato in object.contrato_set.all|dictsortreversed:"vigente" %}#}
-{#                                        <div class="card">#}
-{#                                            <div class="card-header" id="heading{{contrato.id}}" data-toggle="collapse" data-target="#collapse{{contrato.id}}" aria-expanded="true" aria-controls="collapse{{contrato.id}}">#}
-{#                                                <h2 class="mb-0">#}
-{#                                                    <button class="btn btn-link" type="button">#}
-{#                                                        {{ contrato.colegio }}#}
-{#                                                    </button>#}
-{#                                                </h2>#}
-{#                                            </div>#}
-{#                                            <div id="collapse{{contrato.id}}" class="collapse {% if forloop.first %}show{% endif %}" aria-labelledby="heading{{contrato.id}}" data-parent="#accordionExample">#}
-{#                                                <div class="card-body">#}
-{#                                                    <table class="table table-responsive">#}
-{#                                                        <tbody>#}
-{#                                                        <tr>#}
-{#                                                            <th> Tipo de contrato </th>#}
-{#                                                            <td> {{ contrato.get_tipo_contrato_display }} </td>#}
-{#                                                        </tr>#}
-{#                                                        <tr>#}
-{#                                                            <th> Horas contratadas </th>#}
-{#                                                            <td> {{ contrato.horas }} hrs. ({{ contrato.get_tipo_horas_display }}) </td>#}
-{#                                                        </tr>#}
-{#                                                        <tr>#}
-{#                                                            <th> Periodo </th>#}
-{#                                                            <td>  {{ contrato.periodo_contrato }}#}
-{#                                                            </td>#}
-{#                                                        </tr>#}
-{#                                                        {% if contrato.reemplazando %}#}
-{#                                                            <tr>#}
-{#                                                                <th> En reemplazo de</th>#}
-{#                                                                <td> {{ contrato.reemplazando }} </td>#}
-{#                                                            </tr>#}
-{#                                                        {% endif %}#}
-{#                                                        <tr>#}
-{#                                                            <th> Categoria </th>#}
-{#                                                            <td> {{ contrato.get_categoria_display }} </td>#}
-{#                                                        </tr>#}
-{#                                                        <tr>#}
-{#                                                            <th> Función principal </th>#}
-{#                                                            <td> {{ contrato.funcion_principal }} </td>#}
-{#                                                        </tr>#}
-{#                                                        <tr>#}
-{#                                                            <th> Estado Trabajador </th>#}
-{#                                                            <td> {% if contrato.vigente %}#}
-{#                                                                <i class="text-success">Contratado</i>#}
-{#                                                            {% else %}#}
-{#                                                                <i class="text-danger">Desvinculado</i>#}
-{#                                                            {% endif %}#}
-{#                                                            </td>#}
-{#                                                        </tr>#}
-{#                                                        {% if not contrato.vigente %}#}
-{#                                                            <tr>#}
-{#                                                                <th> Razón de baja </th>#}
-{#                                                                <td> {{ contrato.finiquito.get_razon_baja_display }} </td>#}
-{#                                                            </tr>#}
-{#                                                            <tr>#}
-{#                                                                <th> Fecha de finiquito </th>#}
-{#                                                                <td> {{ contrato.fecha }} </td>#}
-{#                                                            </tr>#}
-{#                                                        {% endif %}#}
-{#                                                        </tbody>#}
-{#                                                    </table>#}
-{#                                                </div>#}
-{#                                            </div>#}
-{#                                        </div>#}
-{#                                    {% endfor %}#}
-{#                                </div>#}
-{#                            </div>#}
-{#                        </div>#}
-{#                    {% endif %}#}
-{#                </div>#}
-{#            </div>#}
-{#        </div>#}
-{#    </div>#}
-{#    <br><br><br><br>#}
-{##}
-{#{% endblock %}#}
+{% endblock content %}

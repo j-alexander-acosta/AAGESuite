@@ -91,7 +91,7 @@ class Perfil(models.Model):
     nombre = models.CharField(max_length=150)
     tipo_perfil = models.PositiveSmallIntegerField(default=1, choices=TIPO_PERFIL, verbose_name='Tipo de perfil')
     descripcion = models.TextField(max_length=550, null=True, blank=True, verbose_name='Descripción')
-    solo_lectura = models.BooleanField(default=False)
+    solo_lectura = models.BooleanField(default=False, help_text="Marque si el perfil que está creando, será solo para lectura")
 
     def __str__(self):
         return self.nombre

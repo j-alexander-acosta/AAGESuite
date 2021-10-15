@@ -1,5 +1,5 @@
 {% extends 'base/genericas/listado.html' %}
-{% load bootstrap_pagination %}
+{% load bootstrap_pagination crispy_forms_tags %}
 
 {% block title_page %}
     Usuarios
@@ -25,13 +25,13 @@
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-hover table-centered mb-0">
+                <table id="basic-datatable" class="table table-hover table-centered mb-0">
                     <thead>
                     <tr>
-                        <th><i class="uil uil-user-exclamation"></i> Nombre de usuario</th>
-                        <th><i class="uil uil-user-circle"></i> Nombre</th>
-                        <th><i class="uil uil-user-plus"></i> Apellidos</th>
-                        <th><i class="uil uil-mailbox"></i> Email</th>
+                        <th><i class="uil-user-circle"></i> Usuario</th>
+                        <th><i class="uil-user-exclamation"></i> Nombre</th>
+                        <th><i class="uil-mailbox"></i> Email</th>
+                        <th><i class="uil-user-square"></i> Perfil</th>
                         <th><i class="mdi mdi-cogs"></i> Opciones</th>
                     </tr>
                     </thead>
@@ -39,44 +39,42 @@
                     {% for u in object_list %}
                         <tr>
                             <td>{{ u.username }}</td>
-                            <td>{{ u.first_name }}</td>
-                            <td>{{ u.last_name }}</td>
+                            <td>{{ u.first_name }} {{ u.last_name }}</td>
                             <td>{{ u.email }}</td>
+                            <td>{{ u.perfilusuario.perfil }} -{{ u.perfilusuario.get_nivel_acceso_display }}</td>
                             <td>
                                 <a class="btn btn-sm btn-outline-primary" href="{% url 'gestion:change_password' u.pk %}" data-toggle="tooltip" data-placement="top" title="Cambiar contraseña"><i class="uil-key-skeleton"></i></a>
                                 <a class="btn btn-sm btn-outline-info" href="{% url 'gestion:usuario__editar' u.pk %}" data-toggle="tooltip" data-placement="top" title="Editar"><i class="uil-edit"></i></a>
-{#                                <a class="btn btn-sm btn-outline-danger" href="#" data-toggle="modal" data-target="#eliminar_usuario_{{f.pk}}"><i class="uil-trash" data-toggle="tooltip" data-placement="top" title="Eliminar"></i></a>#}
+                                <a class="btn btn-sm btn-outline-success" href="#" data-toggle="modal" data-target="#cambiar_perfil_usuario_{{u.pk}}">
+                                    <i class="uil-user-square" data-toggle="tooltip" data-placement="top" title="Cambiar Perfil"></i>
+                                </a>
                             </td>
                         </tr>
-                        <div class="modal" tabindex="-1" role="dialog" id="eliminar_usuario_{{u.pk}}">
+                        <div class="modal fade" tabindex="-1" role="dialog" id="cambiar_perfil_usuario_{{u.pk}}">
                             <div class="modal-dialog" role="document">
                                 <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title alert alert-warning bg-white text-warning"><strong>¡Alerta!</strong> Está a punto de eliminar un Usuario</h5>
-                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                            <span aria-hidden="true">&times;</span>
-                                        </button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <p>Está seguro que desea eliminar el usuario "{{ u }}"?.</p>
-                                        <p class="text-muted">Recuerde que eliminará todos los registros asociados a este usuario.</p>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <a role="button" class="btn btn-outline-danger" href="{% url 'gestion:usuario__eliminar' u.pk %}">Eliminar</a>
-                                        <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cerrar</button>
-                                    </div>
+                                    <form class="form-horizontal" action="{% url 'gestion:cambiar_perfil_usuario' u.id %}" method="post">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title"> Cambio de Perfil a {{ u }}</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            {% csrf_token %}
+                                            {% crispy form %}
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="submit" class="btn btn-outline-success">Cambiar Perfil</button>
+                                            <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cerrar</button>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
                         </div>
                     {% endfor %}
                     </tbody>
                 </table>
-            </div>
-        </div>
-
-        <div class="card-footer">
-            <div>
-                {% bootstrap_paginate page_obj range=5 %}
             </div>
         </div>
 
