@@ -62,7 +62,7 @@ class UniversoEncuestaForm(forms.ModelForm):
                         '<a href="javascript:void(0);" id="select_all" type="button" class="float-right">'
                         '<i class="uil-check"></i> Seleccionar todo</a>'
                     ),
-                    Field('evaluadores', css_class='select2')
+                    Field('evaluadores', css_class='chosen')
                 ),
             ),
             # Fieldset(

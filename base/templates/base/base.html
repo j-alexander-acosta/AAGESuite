@@ -124,10 +124,15 @@
 
 <script>
     $(function(i) {
-        $('.chosen').chosen(
-            {width: '100%'});
         {% if not request.path|start_with:"/carga/" %}
-            $('select').select2();
+            $('select').each(function(){
+                console.log($(this));
+                if($(this).attr('class').includes('chosen')){
+                    $(this).chosen({width: '100%'});
+                }else{
+                    $(this).select2();
+                }
+            });
         {% endif %}
 
         $('[data-toggle="tooltip"]').tooltip();
