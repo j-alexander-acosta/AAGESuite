@@ -21,12 +21,12 @@
             <h5>{{ universoencuesta }} <small>{{ object.periodo }}</small>
                 {% block buttons %}
                     <div class="btn-group btn-group-sm float-right">
-                        {#                        <a class="btn btn-outline-primary" href="{% url 'evado:universo_encuesta_edit' object.pk %}"#}
-                        {#                           data-toggle="tooltip" data-placement="top" title="Editar">#}
-                        {#                            <i class="uil-edit"></i></a>#}
-                        <a data-toggle="modal" data-target="#send_mails" class="btn btn-primary">
+                        <a class="btn btn-outline-primary" href="{% url 'evado:universo_encuesta_edit' object.pk %}"
+                           data-toggle="tooltip" data-placement="top" title="Editar">
+                            <i class="uil-edit"></i></a>
+                        <a data-toggle="modal" data-target="#send_mails" class="btn btn-outline-info">
                             <span class="mdi mdi-email-send"></span> Enviar Correos </a>
-                        <a class="btn btn-success" href="{% url 'evado:actualizar_encuestas_universo' object.pk %}">
+                        <a class="btn btn-outline-success" href="{% url 'evado:actualizar_encuestas_universo' object.pk %}">
                             <i class="uil-refresh"></i> Actualizar encuestas
                         </a>
                     </div>
@@ -47,7 +47,7 @@
                             <td>
                                 {{ x.persona }}
                                 <div class="btn-group btn-group-sm float-right">
-                                    <a href="{% url 'evado:enviar_encuesta' x.persona.id universoencuesta.id %}" class="btn btn-primary">
+                                    <a href="{% url 'evado:enviar_encuesta' x.persona.id universoencuesta.id %}" class="btn btn-outline-primary">
                                         <span class="mdi mdi-email-send"></span> Enviar Correo
                                     </a>
                                     {% if request.user.perfilusuario.es_admin or request.user.is_staff %}

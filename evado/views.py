@@ -273,10 +273,14 @@ class UniversoEncuestaCreateView(LoginRequired, SuccessOrErrorMessageMixin, Crea
         self.object.save()
         for evaluador in form.cleaned_data['evaluadores']:
             self.object.evaluadores.add(evaluador)
-            pue = PersonaUniversoEncuesta()
-            pue.universo_encuesta = self.object
-            pue.persona = evaluador
-            pue.save()
+            PersonaUniversoEncuesta.objects.get_or_create(
+                universo_encuesta=self.object,
+                persona=evaluador
+            )
+            # pue = PersonaUniversoEncuesta()
+            # pue.universo_encuesta = self.object
+            # pue.persona = evaluador
+            # pue.save()
 
         # Generando encuestas para el universo
         self.object.generar_encuestas_del_universo()
@@ -294,10 +298,14 @@ class UniversoEncuestaUpdateView(LoginRequired, SuccessOrErrorMessageMixin, Upda
         self.object.save()
         for evaluador in form.cleaned_data['evaluadores']:
             self.object.evaluadores.add(evaluador)
-            pue = PersonaUniversoEncuesta()
-            pue.universo_encuesta = self.object
-            pue.persona = evaluador
-            pue.save()
+            PersonaUniversoEncuesta.objects.get_or_create(
+                universo_encuesta=self.object,
+                persona=evaluador
+            )
+            # pue = PersonaUniversoEncuesta()
+            # pue.universo_encuesta = self.object
+            # pue.persona = evaluador
+            # pue.save()
 
         # Generando encuestas para el universo
         self.object.generar_encuestas_del_universo()
