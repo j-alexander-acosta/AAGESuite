@@ -58,10 +58,10 @@ class UniversoEncuestaForm(forms.ModelForm):
             Fieldset(
                 'Seleccione el universo de personas',
                 Div(
-                    HTML(
-                        '<a href="javascript:void(0);" id="select_all" type="button" class="float-right">'
-                        '<i class="uil-check"></i> Seleccionar todo</a>'
-                    ),
+                    # HTML(
+                    #     '<a href="javascript:void(0);" id="select_all" type="button" class="float-right">'
+                    #     '<i class="uil-check"></i> Seleccionar todo</a>'
+                    # ),
                     Field('evaluadores', css_class='chosen')
                 ),
             ),
