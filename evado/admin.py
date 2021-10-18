@@ -94,7 +94,7 @@ class AplicarUniversoEncuestaPersonaAdmin(admin.ModelAdmin):
         'finalizado'
     )
     list_filter = ['tipo_encuesta', 'persona', 'evaluado']
-    search_fields = ['universo_encuesta', 'tipo_encuesta', 'persona__get_full_name', 'evaluado__get_full_name']
+    search_fields = ['universo_encuesta', 'tipo_encuesta', 'persona', 'evaluado']
 
 
 @admin.register(Encuesta)
@@ -257,11 +257,26 @@ class UniversoEncuestaAdmin(admin.ModelAdmin):
     )
     list_filter = [
         'encuesta',
-        'evaluadores',
+        'tipo_encuesta',
         'inicio',
         'fin',
-        'tipo_encuesta',
         'creado_en',
         'correos_enviados'
+        'evaluadores',
     ]
     search_fields = ['nombre', 'activa']
+
+
+@admin.register(PersonaUniversoEncuesta)
+class PersonaUniversoEncuestaAdmin(admin.ModelAdmin):
+    list_display = (
+        'persona',
+        'universo_encuesta',
+        'correo_enviado',
+        'creado_en',
+    )
+    list_filter = [
+        'universo_encuesta',
+        'persona',
+    ]
+    search_fields = ['persona', 'universo_encuesta']
