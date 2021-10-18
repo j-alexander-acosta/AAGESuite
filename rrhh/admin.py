@@ -6,10 +6,10 @@ from rrhh.models import *
 class PersonaAdmin(admin.ModelAdmin):
     list_display = (
         'rut',
-        'get_full_name',
+        'full_name',
     )
-    search_fields = ['rut', 'get_full_name']
-    list_filter = ['religion', 'titulado', 'profesion', 'nacionalidad']
+    search_fields = ['rut', 'nombres', 'apellido_paterno', 'apellido_materno']
+    list_filter = ['religion', 'titulado', 'nacionalidad', 'profesion']
 
 
 @admin.register(persona.PerfilUsuario)

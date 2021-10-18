@@ -105,13 +105,16 @@ class Persona(models.Model):
             self.apellido_paterno
         )
 
-    @property
+    # @property
     def get_full_name(self):
         return '{} {} {}'.format(
             self.nombres,
             self.apellido_paterno,
             self.apellido_materno
         )
+
+    get_full_name.short_description = "Nombre completo"
+    full_name = property(get_full_name)
 
     @property
     def apellidos(self):
