@@ -317,7 +317,12 @@ class UniversoEncuesta(models.Model):
 
     @property
     def itemes_personas(self):
-        return self.personauniversoencuesta_set.all()
+        return self.personauniversoencuesta_set.all().order_by(
+            'persona__infopersona__fundacion'
+        ).order_by(
+            'persona__infopersona__colegio',
+            'persona'
+        )
 
     def ultima_pregunta_respondida(self, persona):
         ultima_pregunta = None

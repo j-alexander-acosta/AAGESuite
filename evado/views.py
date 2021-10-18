@@ -238,7 +238,8 @@ class UniversoEncuestaDetailView(LoginRequired, DetailView):
                     Q(persona__nombres__icontains=search) |
                     Q(persona__apellido_paterno__icontains=search) |
                     Q(persona__apellido_materno__icontains=search) |
-                    Q(persona__rut__icontains=search)
+                    Q(persona__rut__icontains=search) |
+                    Q(persona__infopersona__colegio__icontains=search)
                 )
             # params = [x.strip() for x in search.split(',')]
             # if len(params) == 3:
