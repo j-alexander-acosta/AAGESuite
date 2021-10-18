@@ -13,6 +13,7 @@ from django.core.exceptions import MultipleObjectsReturned
 from django.core.mail import EmailMultiAlternatives
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.core.validators import validate_email
+from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template import Context
@@ -223,33 +224,46 @@ class UniversoEncuestaDetailView(LoginRequired, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(UniversoEncuestaDetailView, self).get_context_data(**kwargs)
-        # search = self.request.GET.get('search', None)
-        # filtro = False
+        search = self.request.GET.get('search', None)
+        filtro = False
         personas = self.get_object().itemes_personas
-        # if search:
-        #     params = [x.strip() for x in search.split(',')]
-        #     if len(params) == 3:
-        #         personas = personas.filter(persona__nombres__icontains=params[0],
-        #                                    persona__apellidos__icontains=params[1],
-        #                                    persona__rut__icontains=params[2])
-        #     elif len(params) == 2:
-        #         personas = personas.filter(persona__nombres__icontains=params[0],
-        #                                    persona__apellidos__icontains=params[1])
-        #     elif len(params) == 1:
-        #         personas = personas.filter(persona__rut__icontains=params[0])
-        #     else:
-        #         pass
-        #     filtro = True
-        # paginator = Paginator(personas, 30)
-        # page = self.request.GET.get('page')
-        # try:
-        #     personas = paginator.page(page)
-        # except PageNotAnInteger:
-        #     personas = paginator.page(1)
-        # except EmptyPage:
-        #     personas = paginator.page(paginator.num_pages)
+        if search:
+            if "enviado" in search:
+                if search.lower() == 'no enviado':
+                    personas = personas.filter(correo_enviado__isnull=True)
+                else:
+                    personas = personas.filter(correo_enviado__isnull=False)
+            else:
+                personas = personas.filter(
+                    Q(persona__nombres__icontains=search) |
+                    Q(persona__apellido_paterno__icontains=search) |
+                    Q(persona__apellido_materno__icontains=search) |
+                    Q(persona__rut__icontains=search)
+                )
+            # params = [x.strip() for x in search.split(',')]
+            # if len(params) == 3:
+            #     personas = personas.filter(persona__nombres__icontains=params[0],
+            #                                persona__apellidos__icontains=params[1],
+            #                                persona__rut__icontains=params[2])
+            # elif len(params) == 2:
+            #     personas = personas.filter(persona__nombres__icontains=params[0],
+            #                                persona__apellidos__icontains=params[1])
+            # elif len(params) == 1:
+            #     personas = personas.filter(persona__rut__icontains=params[0])
+            # else:
+            #     pass
+            filtro = True
+        paginator = Paginator(personas, 10)
+        page = self.request.GET.get('page')
+        try:
+            personas = paginator.page(page)
+        except PageNotAnInteger:
+            personas = paginator.page(1)
+        except EmptyPage:
+            personas = paginator.page(paginator.num_pages)
         context['personas'] = personas
-        # context['filtro'] = filtro
+        context['filtro'] = filtro
+        context['search'] = search
         return context
 
 

@@ -261,7 +261,7 @@ class UniversoEncuestaAdmin(admin.ModelAdmin):
         'inicio',
         'fin',
         'creado_en',
-        'correos_enviados'
+        'correos_enviados',
         'evaluadores',
     ]
     search_fields = ['nombre', 'activa']

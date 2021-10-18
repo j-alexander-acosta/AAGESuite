@@ -1,4 +1,5 @@
 {% extends 'encuesta/universo_encuesta_list.html' %}
+{% load bootstrap_pagination %}
 
 {% block title_page %}
     Universo de Encuestas - detalle
@@ -36,8 +37,30 @@
         </div>
 
         <div class="card-body">
+            <div class="row">
+                <form class="col-md-4" role="form" method="GET">
+                    <div class="input-group custom-search-form">
+                        <input type="text" class="form-control" name="search" placeholder="Buscar">
+                        <span class="input-group-btn">
+                        <button class="btn btn-info" type="submit">
+                            <span class="uil-search"></span>
+                        </button>
+                    </span>
+                    </div><!-- /input-group -->
+                </form>
+                {% if filtro %}
+                    <div class="col-md-8">
+                        Búsqueda: <em>{{ search }}</em><br>Total de resultados: <em>{{ personas|length }}</em>
+                    </div>
+                {% endif %}
+            </div>
+            {% if filtro %}
+                <a class="small" href="{{ request.path }}">Limpiar Listado</a>
+            {% endif %}
+
+            <hr>
             <div class="table-responsive">
-                <table id="basic-datatable" class="table">
+                <table class="table">
                     <thead>
                     <th>Evaluador</th>
                     </thead>
@@ -65,21 +88,11 @@
                     </tbody>
                 </table>
             </div>
-            {#            <ul class="list-group">#}
-            {#                {% for x in personas %}#}
-            {#                    <li class="list-group-item">#}
-            {#                        {{ x.persona }}#}
-            {#                        <a href="{% url 'evado:enviar_encuesta' x.persona.id universoencuesta.id %}" class="btn btn-sm btn-primary float-right">#}
-            {#                            <span class="mdi mdi-email-send"></span> Enviar Correo#}
-            {#                        </a>#}
-            {#                        <p class="label {% if x.correo_enviado %} text-success {% else %} text-danger {% endif %} mb-0">#}
-            {#                            {% if x.correo_enviado %} Enviado {% else %} No Enviado  {% endif %}#}
-            {#                        </p>#}
-            {#                    </li>#}
-            {#                {% endfor %}#}
-            {#            </ul>#}
+            {% bootstrap_paginate personas range=5 show_first_last="true" %}
         </div>
     </div>
+
+
 
     <!-- Modal -->
     <div class="modal fade" tabindex="-1" role="dialog" id="send_mails">
