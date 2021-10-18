@@ -34,20 +34,18 @@ class SuccessOrErrorMessageMixin(object):
         response = super(SuccessOrErrorMessageMixin, self).form_valid(form)
         success_message = self.get_success_message(form.cleaned_data)
         if success_message:
-            messages.add_message(self.request, messages.SUCCESS, success_message)
-            # messages.success(
-            #     self.request,
-            #     success_message
-            # )
+            messages.success(
+                self.request,
+                success_message
+            )
         return response
 
     def form_invalid(self, form):
         response = super(SuccessOrErrorMessageMixin, self).form_invalid(form)
-        messages.add_message(self.request, messages.WARNING, "El formulario tiene errores, favor revisar")
-        # messages.error(
-        #     self.request,
-        #     self.error_message
-        # )
+        messages.warning(
+            self.request,
+            self.error_message
+        )
         return response
 
     def get_success_message(self, cleaned_data):

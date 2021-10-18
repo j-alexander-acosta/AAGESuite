@@ -2,6 +2,8 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.db.models import Q
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, CreateView, UpdateView, DetailView, DeleteView
 from django.urls import reverse_lazy
@@ -64,6 +66,7 @@ class UserListView(LoginRequiredMixin, ListView):
     model = User
     template_name = 'gestion/usuario/listado_usuario.html'
     search_fields = ['username', 'first_name', 'last_name', 'email']
+    search_fields = [('username', 'icontains',)]
     paginate_by = 6
 
     def get_context_data(self, *args, **kwargs):

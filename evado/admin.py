@@ -84,17 +84,24 @@ class PreguntaEncuestaInline(admin.TabularInline):
 #     search_fields = ['persona__nombres', 'persona__apellidos', 'persona__funcion', 'persona__rut']
 
 
-@admin.register(AplicarUniversoEncuestaPersona)
-class AplicarUniversoEncuestaPersonaAdmin(admin.ModelAdmin):
+@admin.register(TipoUniversoEncuesta)
+class TipoUniversoEncuestaAdmin(admin.ModelAdmin):
     list_display = (
-        'universo_encuesta',
-        'tipo_encuesta',
-        'persona',
-        'evaluado',
-        'finalizado'
+        'nombre',
+        'codigo'
     )
-    list_filter = ['tipo_encuesta', 'persona', 'evaluado']
-    search_fields = ['universo_encuesta', 'tipo_encuesta', 'persona', 'evaluado']
+    list_filter = ['codigo']
+    search_fields = ['codigo']
+
+
+@admin.register(PeriodoEncuesta)
+class PeriodoAdmin(admin.ModelAdmin):
+    list_display = (
+        'nombre',
+        'activo'
+    )
+    list_filter = ['nombre']
+    search_fields = ['nombre']
 
 
 @admin.register(Encuesta)
@@ -110,24 +117,6 @@ class EncuestaAdmin(SummernoteModelAdmin):
     search_fields = ['titulo', 'creado_en']
 
 
-@admin.register(PreguntaEncuesta)
-class PreguntaEncuestaAdmin(admin.ModelAdmin):
-    list_display = (
-        'encuesta',
-        'categoria',
-        'pregunta',
-        'es_respuesta_directa',
-        'no_mostrar_pregunta',
-        'requerida',
-        'tipo_respuesta',
-        'descripcion_item_pregunta',
-        'numero_pregunta',
-        'creado_en'
-    )
-    list_filter = ['categoria', 'es_respuesta_directa', 'requerida']
-    search_fields = ['encuesta', 'categoria', 'es_respuesta_directa', 'requerida']
-
-
 @admin.register(CategoriaPregunta)
 class CategoriaPreguntaAdmin(admin.ModelAdmin):
     list_display = (
@@ -135,88 +124,6 @@ class CategoriaPreguntaAdmin(admin.ModelAdmin):
     )
     list_filter = ['nombre']
     search_fields = ['nombre']
-
-
-@admin.register(Respuesta)
-class RespuestaAdmin(admin.ModelAdmin):
-    list_display = (
-        'respuesta',
-        'columna',
-        'peso',
-        'escrita',
-        'check',
-        'tipo_respuesta'
-    )
-    list_filter = ['peso', 'escrita', 'tipo_respuesta']
-    search_fields = ['peso', 'escrita', 'tipo_respuesta']
-
-
-@admin.register(TipoRespuesta)
-class TipoRespuestaAdmin(admin.ModelAdmin):
-    inlines = [ItemRespuestaInline]
-    list_display = (
-        'nombre',
-        'creado_en'
-    )
-    list_filter = ['creado_en']
-    search_fields = ['creado_en']
-
-
-@admin.register(TipoUniversoEncuesta)
-class TipoUniversoEncuestaAdmin(admin.ModelAdmin):
-    list_display = (
-        'nombre',
-        'codigo'
-    )
-    list_filter = ['codigo']
-    search_fields = ['codigo']
-
-
-@admin.register(RespuestaAplicarUniversoEncuestaPersona)
-class RespuestaAplicarUniversoEncuestaPersonaAdmin(admin.ModelAdmin):
-    list_display = (
-        'aplicar_universo_encuesta_persona',
-        'pregunta',
-        'respuesta',
-        'respuesta_directa',
-        'creado_en'
-    )
-    list_filter = ['aplicar_universo_encuesta_persona__persona', 'aplicar_universo_encuesta_persona__evaluado']
-    search_fields = ['aplicar_universo_encuesta_persona__persona', 'aplicar_universo_encuesta_persona__evaluado']
-
-
-@admin.register(PeriodoEncuesta)
-class PeriodoAdmin(admin.ModelAdmin):
-    list_display = (
-        'nombre',
-        'activo'
-    )
-    list_filter = ['nombre']
-    search_fields = ['nombre']
-
-
-@admin.register(CorreoUniversoEncuesta)
-class CorreoUniversoEncuestaAdmin(admin.ModelAdmin):
-    list_display = (
-        'encabezado',
-        'correo',
-        'universo_encuesta',
-        'enviado',
-        'creado_en'
-    )
-    list_filter = ['universo_encuesta', 'enviado']
-    search_fields = ['universo_encuesta']
-
-
-@admin.register(ConfigurarEncuestaUniversoPersona)
-class ConfigurarEncuestaUniversoPersonaAdmin(admin.ModelAdmin):
-    list_display = (
-        'persona',
-        'tipo_encuesta',
-        'periodo'
-    )
-    list_filter = ['tipo_encuesta', 'periodo', 'persona']
-    search_fields = ['persona', 'evaluados']
 
 
 @admin.register(TipoDescripcionItemPregunta)
@@ -238,6 +145,60 @@ class DescripcionItemPreguntaAdmin(admin.ModelAdmin):
     )
     list_filter = ['tipo_descripcion']
     search_fields = ['tipo_descripcion']
+
+
+@admin.register(PreguntaEncuesta)
+class PreguntaEncuestaAdmin(admin.ModelAdmin):
+    list_display = (
+        'encuesta',
+        'categoria',
+        'pregunta',
+        'es_respuesta_directa',
+        'no_mostrar_pregunta',
+        'requerida',
+        'tipo_respuesta',
+        'descripcion_item_pregunta',
+        'numero_pregunta',
+        'creado_en'
+    )
+    list_filter = ['categoria', 'es_respuesta_directa', 'requerida']
+    search_fields = ['encuesta', 'categoria', 'es_respuesta_directa', 'requerida']
+
+
+@admin.register(TipoRespuesta)
+class TipoRespuestaAdmin(admin.ModelAdmin):
+    inlines = [ItemRespuestaInline]
+    list_display = (
+        'nombre',
+        'creado_en'
+    )
+    list_filter = ['creado_en']
+    search_fields = ['creado_en']
+
+
+@admin.register(Respuesta)
+class RespuestaAdmin(admin.ModelAdmin):
+    list_display = (
+        'respuesta',
+        'columna',
+        'peso',
+        'escrita',
+        'check',
+        'tipo_respuesta'
+    )
+    list_filter = ['peso', 'escrita', 'tipo_respuesta']
+    search_fields = ['peso', 'escrita', 'tipo_respuesta']
+
+
+@admin.register(ConfigurarEncuestaUniversoPersona)
+class ConfigurarEncuestaUniversoPersonaAdmin(admin.ModelAdmin):
+    list_display = (
+        'persona',
+        'tipo_encuesta',
+        'periodo'
+    )
+    list_filter = ['tipo_encuesta', 'periodo', 'persona']
+    search_fields = ['persona', 'evaluados']
 
 
 @admin.register(UniversoEncuesta)
@@ -279,4 +240,68 @@ class PersonaUniversoEncuestaAdmin(admin.ModelAdmin):
         'universo_encuesta',
         'persona',
     ]
-    search_fields = ['persona', 'universo_encuesta']
+    search_fields = [
+        'persona__rut',
+        'persona__nombres',
+        'persona__apellido_paterno',
+        'persona__apellido_materno',
+        'universo_encuesta__encuesta__titulo'
+    ]
+
+
+@admin.register(AplicarUniversoEncuestaPersona)
+class AplicarUniversoEncuestaPersonaAdmin(admin.ModelAdmin):
+    list_display = (
+        'universo_encuesta',
+        'tipo_encuesta',
+        'persona',
+        'evaluado',
+        'finalizado'
+    )
+    list_filter = ['tipo_encuesta', 'persona', 'evaluado']
+    search_fields = [
+        'universo_encuesta__encuesta__titulo',
+        'persona__rut',
+        'persona__nombres',
+        'persona__apellido_paterno',
+        'persona__apellido_materno',
+        'evaluado__rut',
+        'evaluado__nombres',
+        'evaluado__apellido_paterno',
+        'evaluado__apellido_materno',
+    ]
+
+
+@admin.register(CorreoUniversoEncuesta)
+class CorreoUniversoEncuestaAdmin(admin.ModelAdmin):
+    list_display = (
+        'encabezado',
+        'correo',
+        'universo_encuesta',
+        'enviado',
+        'creado_en'
+    )
+    list_filter = ['universo_encuesta', 'enviado']
+    search_fields = ['universo_encuesta']
+
+
+@admin.register(RespuestaAplicarUniversoEncuestaPersona)
+class RespuestaAplicarUniversoEncuestaPersonaAdmin(admin.ModelAdmin):
+    list_display = (
+        'aplicar_universo_encuesta_persona',
+        'pregunta',
+        'respuesta',
+        'respuesta_directa',
+        'creado_en'
+    )
+    list_filter = ['respuesta', 'aplicar_universo_encuesta_persona__persona']
+    search_fields = [
+        'aplicar_universo_encuesta_persona__persona__rut',
+        'aplicar_universo_encuesta_persona__persona__nombres',
+        'aplicar_universo_encuesta_persona__persona__apellido_paterno',
+        'aplicar_universo_encuesta_persona__persona__apellido_materno',
+        'aplicar_universo_encuesta_persona__evaluado__rut',
+        'aplicar_universo_encuesta_persona__evaluado__nombres',
+        'aplicar_universo_encuesta_persona__evaluado__apellido_paterno',
+        'aplicar_universo_encuesta_persona__evaluado__apellido_materno',
+    ]

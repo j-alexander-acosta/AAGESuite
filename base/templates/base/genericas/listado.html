@@ -1,70 +1,40 @@
 {% extends 'base/base.html' %}
 {% load bootstrap_pagination %}
 
-{% block breadcrumb %}
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="#">
-            <i class="uil-cog"></i> Administración
-        </a>
-        </li>
-        <li class="breadcrumb-item active">
-            {{ icono|safe }} Listado de {{ verbose_name_plural }}
-        </li>
-    </ol>
-{% endblock %}
-
 {% block content%}
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-body text-dark">
-                    <h3 class="card-title">
-                        {% block title %}
-                        {% endblock %}
-                        <span class="badge badge-secondary">{{ page_obj.paginator.count }}</span>
-                        {% if not request.user.usuariofuncion.es_dirplac_lectura %}
-                            {% block button_new %}
-                            {% endblock %}
-                        {% endif %}
-                    </h3>
-                    <h6 class="card-subtitle mb-2 text-muted">
-                        {% block subtitle %}
-                        {% endblock %}
-                    </h6>
-                    <br>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <form method="GET">
-                                <div class="input-group custom-search-form ">
-                                    <input type="text" class="form-control" name="q"
-                                           placeholder="{% block search_placeholder %}{% endblock %}"
-                                           {% if request.GET.q %}value="{{ request.GET.q }}"{% endif %} >
-                                    <span class="input-group-btn">
-                                <button class="btn btn-outline-info" type="submit">
-                                    <i class="uil-search"></i>
-                                </button>
-                            </span>
-                                </div>
-                            </form>
-                            {% if request.GET.q %}
-                                <a href="{{ request.path }}">
-                                    Quitar Filtro
-                                </a>
-                            {% endif %}
-                        </div>
+    <div class="card">
+        <div class="card-header">
+            <h5>{% block title_card %}{% endblock %}
+                {% block buttons_card %}{% endblock %}
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <form class="col-md-4" role="form" method="GET">
+                    <div class="input-group custom-search-form">
+                        <input type="text" class="form-control" name="q" placeholder="Buscar">
+                        <span class="input-group-btn">
+                        <button class="btn btn-info" type="submit">
+                            <span class="uil-search"></span>
+                        </button>
+                    </span>
+                    </div><!-- /input-group -->
+                </form>
+                {% if filtro %}
+                    <div class="col-md-8">
+                        Búsqueda: <em>{{ search }}</em><br>Total de resultados: <em>{{ object_list|length }}</em>
                     </div>
-                    <br>
-                    {% block content_list %}
-                    {% endblock %}
-                </div>
-                <div class="card-footer">
-                    <div align="center">
-                        {% bootstrap_paginate page_obj range=5 %}
-                    </div>
-                </div>
+                {% endif %}
             </div>
+            {% if filtro %}
+                <a class="small" href="{{ request.path }}">Limpiar Listado</a>
+            {% endif %}
+            <div class="table-responsive">
+                {% block table %}
+                {% endblock %}
+            </div>
+{#            {% bootstrap_paginate object_list range=5 show_first_last="true" %}#}
         </div>
     </div>
-    <br><br><br>
 
 {% endblock%}
