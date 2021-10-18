@@ -201,9 +201,18 @@ class ConfigurarEncuestaUniversoPersonaAdmin(admin.ModelAdmin):
     search_fields = ['persona', 'evaluados']
 
 
+def generar_universo(modaladmin, request, queryset):
+    for ue in queryset:
+        ue.generar_encuestas_del_universo()
+
+
+generar_universo.short_description = u"Generar encuestas del universo"
+
+
 @admin.register(UniversoEncuesta)
 class UniversoEncuestaAdmin(admin.ModelAdmin):
-    inlines = [ItemPersonaUniversoEncuesta]
+    # inlines = [ItemPersonaUniversoEncuesta]
+    actions = [generar_universo]
     list_display = (
         'encuesta',
         'contenido_email',

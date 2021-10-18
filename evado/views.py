@@ -1066,6 +1066,7 @@ def eliminar_configurar_universo_personas(request, pk):
     messages.add_message(request, messages.SUCCESS,
                          'La configuración ha sido eliminada')
     confi.delete()
+    #TODO ELiminar AplicarUniversoEncuesta de la configuración que se esta eliminando
     return redirect('evado:configurar_universo_personas')
 
 
