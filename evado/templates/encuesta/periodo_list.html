@@ -30,6 +30,7 @@
         <tr>
             <th><i class="uil uil-user-exclamation"></i> Nombre </th>
             <th><i class="uil uil-check-circle"></i> Activo </th>
+            <th><i class="uil uil-clock"></i> Periodo </th>
             <th><i class="mdi mdi-cogs"></i> Opciones </th>
         </tr>
         </thead>
@@ -38,9 +39,12 @@
             <tr>
                 <td>{{ o.nombre }}</td>
                 <td> {% if o.activo %}<i class="text-success uil-check-circle"></i>{% endif %} {{ o.activo|yesno|title }} </td>
+                <td> {{ o.get_full_periodo }}</td>
                 <td>
                     <a class="btn btn-outline-primary" href="{% url 'evado:periodo_update' o.pk %}"
                        data-toggle="tooltip" data-placement="top" title="Editar"><i class="uil-edit"></i></a>
+                    <a class="btn btn-outline-warning" href="{% url 'evado:cambiar_periodo_activo' o.pk %}"
+                       data-toggle="tooltip" data-placement="top" title="Cambiar Grupo Activo"><i class="uil-refresh"></i></a>
                 </td>
             </tr>
         {% endfor %}

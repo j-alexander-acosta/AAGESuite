@@ -25,12 +25,17 @@ class UniversoEncuestaForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
+        try:
+            grupo = kwargs.pop('grupo')
+        except:
+            grupo = PeriodoEncuesta.objects.filter(activo=True).first()
         super(UniversoEncuestaForm, self).__init__(*args, **kwargs)
+        print(grupo)
         self.fields['tipo_encuesta'].queryset = TipoUniversoEncuesta.objects.filter(codigo='EN0002')
         self.fields['activar_campo_comentario'].label = "Activar Campo de Observaciones"
         # TODO Filtrar por el periodo seleccionado, las configuraciones correspondientes
         self.fields['periodo'].initial = PeriodoEncuesta.objects.filter(activo=True).first()
-        ids_personas = ConfigurarEncuestaUniversoPersona.objects.all().distinct('persona').values_list('persona__id')
+        ids_personas = ConfigurarEncuestaUniversoPersona.objects.filter(periodo=grupo).distinct('persona').values_list('persona__id')
         self.fields['evaluadores'].queryset = Persona.objects.filter(id__in=ids_personas)
         self.fields['inicio'] = forms.DateField(
             widget=forms.widgets.DateInput(attrs={'type': 'date'}),

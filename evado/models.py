@@ -172,8 +172,18 @@ class Respuesta(models.Model):
         )
 
 
+PERIODO_CHOICE = (
+    ('verano', 'Verano'),
+    ('primer_semestre', 'Primer Semestre'),
+    ('invierno', 'Invierno'),
+    ('segundo_semestre', 'Segundo Semestre'),
+)
+
+
 class PeriodoEncuesta(models.Model):
     nombre = models.CharField(max_length=20)
+    anio = models.PositiveIntegerField(null=True, blank=True, verbose_name="Año")
+    periodo = models.CharField(max_length=25, choices=PERIODO_CHOICE, null=True, blank=True)
     activo = models.BooleanField(default=False)
 
     def clean(self, *args, **kwargs):
@@ -183,6 +193,17 @@ class PeriodoEncuesta(models.Model):
 
     def get_absolute_url(self):
         return reverse('evado:periodo_list')
+
+    @property
+    def get_full_periodo(self):
+        if self.periodo or self.anio:
+            periodo = '{} {}'.format(
+                self.get_periodo_display() if self.periodo else '',
+                self.anio if self.anio else ''
+            )
+        else:
+            periodo = '-'
+        return periodo
 
     def __str__(self):
         return '{}'.format(

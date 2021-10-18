@@ -11,6 +11,7 @@ urlpatterns = [
     url(r'^periodos/nuevo/$', views.PeriodoEncuestaCreateView.as_view(), name='periodo_create'),
     url(r'^periodos/(?P<pk>\d+)/detalle/$', views.PeriodoEncuestaDetailView.as_view(), name='periodo_detail'),
     url(r'^periodos/(?P<pk>\d+)/actualizar/$', views.PeriodoEncuestaUpdateView.as_view(), name='periodo_update'),
+    url(r'^periodos/(?P<id_periodo>\d+)/cambiar-activo/$', views.cambiar_periodo_activo, name='cambiar_periodo_activo'),
     # Encuestas
     url(r'^encuestas/$', views.EncuestaListView.as_view(), name='encuesta_list'),
     url(r'^encuesta/(?P<pk>\d+)/detalle/$', views.EncuestaDetailView.as_view(), name='encuesta_detail'),

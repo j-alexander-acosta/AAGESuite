@@ -302,11 +302,17 @@ class UniversoEncuestaCreateView(LoginRequired, SuccessOrErrorMessageMixin, Crea
         return super(ModelFormMixin, self).form_valid(form)
 
 
-class UniversoEncuestaUpdateView(LoginRequired, SuccessOrErrorMessageMixin, UpdateView,):
+class UniversoEncuestaUpdateView(LoginRequired, SuccessOrErrorMessageMixin, UpdateView):
     model = UniversoEncuesta
     form_class = UniversoEncuestaForm
     template_name = 'encuesta/universo_encuesta_create.html'
     success_message = "El Universo de Encuestas fue actualizado satisfactoriamente"
+
+    def get_form_kwargs(self):
+        kwargs = super(UniversoEncuestaUpdateView, self).get_form_kwargs()
+        grupo = self.object.periodo
+        kwargs.update({'grupo': grupo})
+        return kwargs
 
     def form_valid(self, form):
         self.object = form.save(commit=False)
@@ -844,6 +850,7 @@ class PeriodoEncuestaListView(LoginRequired, ListView):
     search_fields = [('nombres', 'icontains',), ('apellidos', 'icontains',), ('rut', 'icontains',),
                      ('funcion', 'icontains',), ('email', 'icontains',)]
     paginate_by = 10
+    ordering = ['-activo', 'anio', 'periodo', 'nombre']
 
 
 class PeriodoEncuestaDetailView(LoginRequired, DetailView):
@@ -861,6 +868,24 @@ class PeriodoEncuestaCreateView(LoginRequired, CreateView):
     model = PeriodoEncuesta
     form_class = PeriodoEncuestaForm
     template_name = 'encuesta/periodo_create.html'
+
+
+def cambiar_periodo_activo(request, id_periodo):
+    periodo_actual = PeriodoEncuesta.objects.filter(activo=True).first()
+    nuevo_periodo = get_object_or_404(
+        PeriodoEncuesta,
+        id=id_periodo
+    )
+    if not periodo_actual == nuevo_periodo:
+        periodo_actual.activo = False
+        periodo_actual.save()
+        nuevo_periodo.activo = True
+        nuevo_periodo.save()
+        messages.success(request, "El Grupo activo fue cambiado satisfactoriamente")
+    else:
+        messages.warning(request, "El Grupo que intenta activar, ya es el grupo activo")
+
+    return redirect('evado:periodo_list')
 
 
 # Correos del Universo de encuestas

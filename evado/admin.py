@@ -198,7 +198,13 @@ class ConfigurarEncuestaUniversoPersonaAdmin(admin.ModelAdmin):
         'periodo'
     )
     list_filter = ['tipo_encuesta', 'periodo', 'persona']
-    search_fields = ['persona', 'evaluados']
+    search_fields = [
+        'periodo__nombre',
+        'persona__rut',
+        'persona__nombres',
+        'persona__apellido_paterno',
+        'persona__apellido_materno',
+    ]
 
 
 def generar_universo(modaladmin, request, queryset):

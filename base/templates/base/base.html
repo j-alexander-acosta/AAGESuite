@@ -128,7 +128,12 @@
             $('select').each(function(){
                 console.log($(this));
                 if($(this).attr('class').includes('chosen')){
-                    $(this).chosen({width: '100%'});
+                    $(this).chosen({
+                        width: '100%',
+                        no_results_text: "No existen coincidencias",
+                        placeholder_text_single: "Seleccione una opción",
+                        placeholder_text_multiple: "Seleccione las opciones"
+                    });
                 }else{
                     $(this).select2();
                 }
