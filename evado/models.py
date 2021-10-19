@@ -324,6 +324,7 @@ class UniversoEncuesta(models.Model):
         :return: Diccionario de Aplicar Universo Encuesta Persona
         """
         aues = []
+        preguntas = self.encuesta.preguntaencuesta_set.all()
         for evaluador in self.evaluadores.all():
             configs = ConfigurarEncuestaUniversoPersona.objects.filter(persona=evaluador, periodo=self.periodo)
             for cup in configs:
@@ -334,7 +335,8 @@ class UniversoEncuesta(models.Model):
                         evaluado=x,
                         tipo_encuesta=cup.tipo_encuesta
                     )
-                    aues.append(aue)
+                    if created or RespuestaAplicarUniversoEncuestaPersona.objects.filter(aplicar_universo_encuesta_persona=aue).count() < preguntas.count():
+                        aues.append(aue)
         return aues
 
     @property
