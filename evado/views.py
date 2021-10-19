@@ -434,16 +434,40 @@ def redirect_url_tomar_encuesta(hash, page):
     # return redirect('evado:tomar_encuesta', hash)
 
 
+def generar_preguntas_faltantes(universo_encuesta, todas_aues):
+    aues = []
+    preguntas = universo_encuesta.encuesta.preguntaencuesta_set.all()
+    generadas = False
+    for aue in todas_aues:
+        if RespuestaAplicarUniversoEncuestaPersona.objects.filter(
+                aplicar_universo_encuesta_persona=aue).count() < preguntas.count():
+            aues.append(aue)
+            aue.finalizado = None
+            aue.save()
+    if len(aues) > 0:
+        UniversoEncuesta.generar_preguntas_para_aues(universo_encuesta, aues)
+        generadas = True
+    return generadas
+
+
 def tomar_encuesta(request, hash):
     context = {}
     aeu = get_object_or_404(AplicarUniversoEncuestaPersona, hash=hash)
+    universo_encuesta = aeu.universo_encuesta
     request_page = request.GET.get('page')
     page = int(request_page) if request_page else 0
     # update
     todas_aeu_para_una_persona = AplicarUniversoEncuestaPersona.objects.filter(
         persona=aeu.persona,
-        universo_encuesta=aeu.universo_encuesta
+        universo_encuesta=universo_encuesta
     ).order_by('tipo_encuesta__codigo')
+
+    generadas = generar_preguntas_faltantes(universo_encuesta, todas_aeu_para_una_persona)
+    print(generadas)
+    if generadas:
+        aeu.finalizado = None
+        aeu.save()
+    print(aeu.finalizado)
 
     context.update({'todas_las_encuestas': todas_aeu_para_una_persona})
 
