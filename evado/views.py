@@ -914,7 +914,7 @@ class CorreoUniversoEncuestaUpdateView(LoginRequired, UpdateView):
 @login_required
 def enviar_recordar_contestar_encuestas(request, id_universo_correo):
     correo = get_object_or_404(CorreoUniversoEncuesta, id=id_universo_correo)
-    for p in correo.universo_encuesta.personas.all():
+    for p in correo.universo_encuesta.evaluadores.all():
         if AplicarUniversoEncuestaPersona.objects.filter(persona=p, universo_encuesta=correo.universo_encuesta,
                                                          finalizado__isnull=True).count() > 0:
             recordar_contestar_encuestas(request, p.id, correo.id, False)
@@ -1085,13 +1085,33 @@ def enviar_correo_personalizado(personas, universos, contenido_mail, motivo):
                     pass
 
 
+def limpiar_personas_universo(universo):
+    pues = PersonaUniversoEncuesta.objects.filter(universo_encuesta=universo)
+    for pue in pues:
+        aues = AplicarUniversoEncuestaPersona.objects.filter(
+            universo_encuesta=pue.universo_encuesta,
+            persona=pue.persona
+        )
+        if not aues:
+            pue.delete()
+
+
 @login_required
 def eliminar_configurar_universo_personas(request, pk):
     confi = get_object_or_404(ConfigurarEncuestaUniversoPersona, pk=pk)
-    messages.add_message(request, messages.SUCCESS,
-                         'La configuración ha sido eliminada')
+    universo_encuesta = UniversoEncuesta()
+    for evaluado in confi.evaluados.all():
+        aues = AplicarUniversoEncuestaPersona.objects.filter(
+            persona=confi.persona,
+            evaluado=evaluado,
+            tipo_encuesta=confi.tipo_encuesta,
+            universo_encuesta__periodo=confi.periodo
+        )
+        universo_encuesta = aues.first().universo_encuesta
+        aues.delete()
+    limpiar_personas_universo(universo_encuesta)
     confi.delete()
-    #TODO ELiminar AplicarUniversoEncuesta de la configuración que se esta eliminando
+    messages.success(request, 'La configuración y las encuestas asociadas, han sido eliminadas')
     return redirect('evado:configurar_universo_personas')
 
 

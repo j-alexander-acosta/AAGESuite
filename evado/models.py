@@ -296,8 +296,10 @@ class UniversoEncuesta(models.Model):
         preguntas = self.encuesta.preguntaencuesta_set.all()
         for aue in aues:
             lista_respuestas = []
+            preguntas_aue_ids = aue.respuestaaplicaruniversoencuestapersona_set.all().values_list('pregunta__id')
+            preguntas_existentes = PreguntaEncuesta.objects.filter(id__in=preguntas_aue_ids)
             for p in preguntas:
-                if p.requerida:
+                if p.requerida and p not in preguntas_existentes:
                     lista_respuestas.append(
                         RespuestaAplicarUniversoEncuestaPersona(aplicar_universo_encuesta_persona=aue, pregunta=p))
             RespuestaAplicarUniversoEncuestaPersona.objects.bulk_create(lista_respuestas)
@@ -332,8 +334,7 @@ class UniversoEncuesta(models.Model):
                         evaluado=x,
                         tipo_encuesta=cup.tipo_encuesta
                     )
-                    if created:
-                        aues.append(aue)
+                    aues.append(aue)
         return aues
 
     @property

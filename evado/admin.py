@@ -84,6 +84,19 @@ class PreguntaEncuestaInline(admin.TabularInline):
 #     search_fields = ['persona__nombres', 'persona__apellidos', 'persona__funcion', 'persona__rut']
 
 
+@admin.register(InfoPersona)
+class InfoPersonaAdmin(admin.ModelAdmin):
+    list_display = (
+        'persona',
+        'funcion',
+        'colegio',
+        'fundacion'
+    )
+    list_filter = ['fundacion', 'funcion', 'colegio']
+    search_fields = ['funcion', 'colegio', 'fundacion',
+                     'persona__nombres', 'persona__apellido_paterno', 'persona__apellido_materno']
+
+
 @admin.register(TipoUniversoEncuesta)
 class TipoUniversoEncuestaAdmin(admin.ModelAdmin):
     list_display = (
@@ -273,7 +286,7 @@ class AplicarUniversoEncuestaPersonaAdmin(admin.ModelAdmin):
         'evaluado',
         'finalizado'
     )
-    list_filter = ['tipo_encuesta', 'persona', 'evaluado']
+    list_filter = ['tipo_encuesta', 'universo_encuesta__periodo', 'persona']
     search_fields = [
         'universo_encuesta__encuesta__titulo',
         'persona__rut',
