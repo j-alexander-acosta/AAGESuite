@@ -1,5 +1,5 @@
 {% extends 'base/base.html' %}
-{% load staticfiles crispy_forms_tags %}
+{% load staticfiles crispy_forms_tags bootstrap_pagination %}
 
 {% block title_page %}
     Configuración de Evaluados
@@ -69,8 +69,28 @@
     <div class="card">
         <div class="card-body">
             <h4>Configuración de evaluados</h4>
+            <div class="my-2">
+                <div class="row">
+                    <form class="col-md-4" role="form" method="GET">
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="search" placeholder="Buscar">
+                            <div class="input-group-append">
+                                <button class="btn btn-info" type="submit"><i class="uil-search"></i></button>
+                            </div>
+                        </div>
+                    </form>
+                    {% if search %}
+                        <div class="col-md-8">
+                            <strong>Búsqueda:</strong> <em>{{ search }}</em><br><strong>Total de resultados:</strong> <em>{{ total_resultados }}</em>
+                        </div>
+                    {% endif %}
+                </div>
+                {% if search %}
+                    <a class="small" href="{{ request.path }}">Limpiar Listado</a>
+                {% endif %}
+            </div>
             <div class="table-responsive">
-                <table id="basic-datatable" class="table table-bordered table-hover">
+                <table class="table table-bordered table-hover">
                     <thead>
                     <tr>
                         <th> Detalle </th>
@@ -79,43 +99,32 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {% regroup configuraciones by persona as configs %}
 
-                    {% for x in configs %}
-
-                        {% regroup x.list by tipo_encuesta as tipos_encuestas %}
-
-                        {% for t in tipos_encuestas %}
-                            {% regroup t.list by periodo as periodos %}
-
-                            {% for p in periodos %}
-                                <tr>
-                                    <td> <strong>Evaluador:</strong> {{ p.list.0.persona }} <br>
-                                        <strong>Tipo de Universo de Encuesta:</strong> {{ p.list.0.tipo_encuesta }} <br>
-                                        <strong>Grupo:</strong> {{ p.grouper }}
-                                    </td>
-                                    <td>
-                                        <ul>
-                                            {% for item in p.list %}
-                                                {% for evaluado in item.evaluados.all %}
-                                                    <li> {{ evaluado.rut }} - {{ evaluado.nombres }} {{ evaluado.apellidos }} </li>
-                                                {% endfor %}
-                                            {% endfor %}
-                                        </ul>
-                                    </td>
-                                    <td>
-                                        <a href="{% url 'evado:eliminar_configurar_universo_personas' p.list.0.id %}" class="btn btn-danger btn-xs">
-                                            <span class="uil-trash-alt"> </span>
-                                        </a>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        {% endfor %}
+                    {% for confi in configuraciones %}
+                        <tr>
+                            <td><strong>Evaluador:</strong> {{ confi.persona }} <br>
+                                <strong>Tipo de Universo de Encuesta:</strong> {{ confi.tipo_encuesta }} <br>
+                                <strong>Grupo:</strong> {{ confi.periodo }}
+                            </td>
+                            <td>
+                                <ul>
+                                    {% for evaluado in confi.evaluados.all %}
+                                        <li> {{ evaluado.rut }} - {{ evaluado.get_full_name }} </li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                            <td>
+                                <a href="{% url 'evado:eliminar_configurar_universo_personas' confi.id %}" class="btn btn-danger btn-xs">
+                                    <span class="uil-trash-alt"> </span>
+                                </a>
+                            </td>
+                        </tr>
                     {% endfor %}
                     </tbody>
                 </table>
             </div>
-            <a class="btn btn-danger" href="{% url 'evado:eliminar_todos_eup' %}">Eliminar Relaciones</a>
+            {% bootstrap_paginate configuraciones range=5 show_first_last="true" %}
+            <a class="btn btn-danger float-right" href="{% url 'evado:eliminar_todos_eup' %}">Eliminar Relaciones</a>
         </div>
     </div>
 {% endblock %}

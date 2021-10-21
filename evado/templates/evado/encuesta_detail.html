@@ -120,7 +120,7 @@
                         </ol>
                     {% endfor %}
                 </div>
-                <div class="tab-pane {% if filtro or page %}show active{% endif %}" id="profile-b1">
+                <div class="tab-pane {% if search or page %}show active{% endif %}" id="profile-b1">
                     <div class="my-2">
                         <div class="row">
                             <form class="col-md-4" role="form" method="GET">
@@ -131,13 +131,13 @@
                                     </div>
                                 </div>
                             </form>
-                            {% if filtro %}
+                            {% if search %}
                                 <div class="col-md-8">
                                     Búsqueda: <em>{{ search }}</em><br>Total de resultados: <em>{{ total_resultados }}</em>
                                 </div>
                             {% endif %}
                         </div>
-                        {% if filtro %}
+                        {% if search %}
                             <a class="small" href="{{ request.path }}">Limpiar Listado</a>
                         {% endif %}
                     </div>

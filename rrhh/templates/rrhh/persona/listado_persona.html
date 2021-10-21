@@ -1,5 +1,5 @@
 {% extends 'base/base.html' %}
-{% load staticfiles bootstrap_pagination %}
+{% load staticfiles %}
 
 {% block title_page %}
     Personas
@@ -77,6 +77,7 @@
                     </tbody>
                 </table>
             </div>
+{#            {% bootstrap_paginate object_list range=5 show_first_last="true" %}#}
         </div>
     </div>
 

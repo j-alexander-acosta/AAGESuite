@@ -72,7 +72,7 @@
                 <div class="m-0 border-left">
                     <div class="card-body text-center">
                         <i class="dripicons-document-edit text-muted" style="font-size: 32px;"></i>
-                        <h3><span>{{ encuestas_rendidas|length }}</span></h3>
+                        <h3><span>{{ total_ultimas_rendidas }}</span></h3>
                         <p class="text-muted font-15 mb-0">Últimas rendidas <small> hace 2 días </small></p>
                     </div>
                 </div>
@@ -135,7 +135,7 @@
 
                 </div> <!-- end card body-->
             </div>
-            <div class="tab-pane" id="second">
+            <div class="tab-pane {% if page %}show active{% endif %}" id="second">
                 <div class="card-body">
                     {#                    <div class="dropdown float-right">#}
                     {#                        <a href="#" class="dropdown-toggle arrow-none card-drop" data-toggle="dropdown" aria-expanded="false">#}
@@ -185,10 +185,10 @@
                             </tbody>
                         </table>
                     </div> <!-- end table-responsive-->
-
+                    {% bootstrap_paginate encuestas_finalizadas range=5 show_first_last="true" %}
                 </div> <!-- end card body-->
             </div>
-            <div class="tab-pane {% if page %}show active{% endif %}" id="third">
+            <div class="tab-pane" id="third">
                 <div class="card-body">
                     {#                    <div class="dropdown float-right">#}
                     {#                        <a href="#" class="dropdown-toggle arrow-none card-drop" data-toggle="dropdown" aria-expanded="false">#}
@@ -210,7 +210,7 @@
                     {#                    <p><b>107</b> Tasks completed out of 195</p>#}
 
                     <div class="table-responsive">
-                        <table class="table table-centered table-nowrap table-hover mb-0">
+                        <table id="basic-datatable" class="table table-centered table-nowrap table-hover mb-0">
                             <tbody>
                             {% for x in encuestas_rendidas %}
                                 <tr>
@@ -237,7 +237,6 @@
                             </tbody>
                         </table>
                     </div> <!-- end table-responsive-->
-                    {% bootstrap_paginate encuestas_rendidas range=5 show_first_last="true" %}
                 </div> <!-- end card body-->
             </div>
         </div>

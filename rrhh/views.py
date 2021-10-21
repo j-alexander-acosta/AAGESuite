@@ -72,7 +72,7 @@ class PersonaListView(LoginRequiredMixin, ListView):
     """
     model = Persona
     template_name = 'rrhh/persona/listado_persona.html'
-    paginate_by = 10
+    #TODO agregar paginacion
 
 
 class PersonaCreateView(LoginRequiredMixin, CreateView):

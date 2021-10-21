@@ -30,10 +30,9 @@ class UniversoEncuestaForm(forms.ModelForm):
         except:
             grupo = PeriodoEncuesta.objects.filter(activo=True).first()
         super(UniversoEncuestaForm, self).__init__(*args, **kwargs)
-        print(grupo)
         self.fields['tipo_encuesta'].queryset = TipoUniversoEncuesta.objects.filter(codigo='EN0002')
         self.fields['activar_campo_comentario'].label = "Activar Campo de Observaciones"
-        # TODO Filtrar por el periodo seleccionado, las configuraciones correspondientes
+        # TODO Filtrar por el periodo seleccionado, las configuraciones correspondientes, utilizar otro que no sea periodo o grupo activo
         self.fields['periodo'].initial = PeriodoEncuesta.objects.filter(activo=True).first()
         ids_personas = ConfigurarEncuestaUniversoPersona.objects.filter(periodo=grupo).distinct('persona').values_list('persona__id')
         self.fields['evaluadores'].queryset = Persona.objects.filter(id__in=ids_personas)
@@ -63,17 +62,9 @@ class UniversoEncuestaForm(forms.ModelForm):
             Fieldset(
                 'Seleccione el universo de personas',
                 Div(
-                    # HTML(
-                    #     '<a href="javascript:void(0);" id="select_all" type="button" class="float-right">'
-                    #     '<i class="uil-check"></i> Seleccionar todo</a>'
-                    # ),
                     Field('evaluadores', css_class='chosen')
                 ),
             ),
-            # Fieldset(
-            #   'Seleccionar Cursos Disponibles',
-            #   Field('cursos'),
-            # ),
             Fieldset(
                 'Tiempo disponible',
                 Div(

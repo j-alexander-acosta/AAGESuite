@@ -13,7 +13,8 @@ from django.core.exceptions import MultipleObjectsReturned
 from django.core.mail import EmailMultiAlternatives
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.core.validators import validate_email
-from django.db.models import Q, Count, SlugField
+from django.db.models import Q, Count, SlugField, Value
+from django.db.models.functions import Concat
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template import Context
@@ -49,17 +50,17 @@ def home(request):
         total_encuestas_finalizadas += pues.count()
         for pue in pues:
             encuestas_finalizadas.append(pue)
-    context['encuestas_finalizadas'] = encuestas_finalizadas
     context['total_encuestas_finalizadas'] = total_encuestas_finalizadas
+    page = request.GET.get('page')
+    encuestas_finalizadas = paginador(encuestas_finalizadas, page)
+    context['encuestas_finalizadas'] = encuestas_finalizadas
+    context['page'] = page
 
     auep = AplicarUniversoEncuestaPersona.objects.filter(
         finalizado__gte=two_days_before
     ).order_by(
         '-finalizado'
     )
-    page = request.GET.get('page')
-    auep = paginador(auep, page)
-    context['page'] = page
     context['encuestas_rendidas'] = auep
 
     return render(request, 'evado/home.html', context)
@@ -106,16 +107,15 @@ class EncuestaDetailView(LoginRequired, DetailView):
     def get_context_data(self, **kwargs):
         context = super(EncuestaDetailView, self).get_context_data(**kwargs)
         search = self.request.GET.get('search', None)
-        filtro = False
-        aues = AplicarUniversoEncuestaPersona.objects.filter(universo_encuesta__encuesta=self.object).order_by('-finalizado')
+        aues = AplicarUniversoEncuestaPersona.objects.filter(universo_encuesta__encuesta=self.object).annotate(
+            nombre_persona=Concat('persona__nombres', Value(' '), 'persona__apellido_paterno', Value(' '), 'persona__apellido_materno')
+        ).order_by('-finalizado')
         if search:
             if search.lower() in 'pendiente':
                 aues = aues.filter(finalizado__isnull=True)
             else:
                 aues = aues.filter(
-                    Q(persona__nombres__icontains=search) |
-                    Q(persona__apellido_paterno__icontains=search) |
-                    Q(persona__apellido_materno__icontains=search) |
+                    Q(nombre_persona__icontains=search) |
                     Q(persona__rut__icontains=search) |
                     Q(persona__infopersona__colegio__icontains=search) |
                     Q(evaluado__nombres__icontains=search) |
@@ -124,12 +124,10 @@ class EncuestaDetailView(LoginRequired, DetailView):
                     Q(evaluado__rut__icontains=search) |
                     Q(evaluado__infopersona__colegio__icontains=search)
                 )
-            filtro = True
             context['total_resultados'] = aues.count()
         page = self.request.GET.get('page')
         aues = paginador(aues, page)
         context['page'] = page
-        context['filtro'] = filtro
         context['search'] = search
         context['form_pregunta'] = PreguntaEncuestaForm()
         context['aplicar_encuestas'] = aues
@@ -276,16 +274,16 @@ class UniversoEncuestaDetailView(LoginRequired, DetailView):
         search = self.request.GET.get('search', None)
         colegio = self.request.GET.get('colegio', None)
         estado = self.request.GET.get('estado', None)
-        personas = self.get_object().itemes_personas
+        personas = self.get_object().itemes_personas.annotate(
+            nombre_persona=Concat('persona__nombres', Value(' '), 'persona__apellido_paterno', Value(' '), 'persona__apellido_materno')
+        )
         context['colegios'] = personas.values(
             'persona__infopersona__colegio').distinct('persona__infopersona__colegio')
         if search:
             if "enviado" in search.lower():
-                print("enviado")
                 if search.lower() == 'no enviado':
                     personas = personas.filter(correo_enviado__isnull=True)
                 else:
-                    print("enviado")
                     personas = personas.filter(correo_enviado__isnull=False)
             elif "finalizada" in search.lower():
                 personas = personas.filter(encuesta_finalizada__isnull=False)
@@ -293,9 +291,7 @@ class UniversoEncuestaDetailView(LoginRequired, DetailView):
                 personas = personas.filter(encuesta_finalizada__isnull=True)
             else:
                 personas = personas.filter(
-                    Q(persona__nombres__icontains=search) |
-                    Q(persona__apellido_paterno__icontains=search) |
-                    Q(persona__apellido_materno__icontains=search) |
+                    Q(nombre_persona__icontains=search) |
                     Q(persona__rut__icontains=search) |
                     Q(persona__infopersona__colegio__icontains=search)
                 )
@@ -1118,9 +1114,33 @@ def configurar_universo_personas(request):
 
     context = {
         'form': form,
-        'formImport': ImportarConfiguracionUniversoPersonaForm(initial={'periodo_encuesta': PeriodoEncuesta.objects.filter(activo=True).first()}),
-        'configuraciones': ConfigurarEncuestaUniversoPersona.objects.order_by('persona', 'tipo_encuesta', 'periodo')
+        'formImport': ImportarConfiguracionUniversoPersonaForm(
+            initial={'periodo_encuesta': PeriodoEncuesta.objects.filter(activo=True).first()})
     }
+
+    search = request.GET.get('search', None)
+    configs = ConfigurarEncuestaUniversoPersona.objects.all().annotate(
+        nombre_persona=Concat('persona__nombres', Value(' '), 'persona__apellido_paterno', Value(' '), 'persona__apellido_materno')
+    ).order_by('persona', 'tipo_encuesta', 'periodo')
+    if search:
+        configs = configs.filter(
+            Q(nombre_persona__icontains=search) |
+            Q(persona__rut__icontains=search) |
+            Q(persona__infopersona__colegio__icontains=search) |
+            Q(evaluados__nombres__icontains=search) |
+            Q(evaluados__apellido_paterno__icontains=search) |
+            Q(evaluados__apellido_materno__icontains=search) |
+            Q(evaluados__rut__icontains=search) |
+            Q(periodo__nombre__icontains=search) |
+            Q(tipo_encuesta__nombre__icontains=search)
+        ).distinct('persona', 'tipo_encuesta', 'periodo')
+        context['total_resultados'] = configs.count()
+    page = request.GET.get('page')
+    configs = paginador(configs, page)
+    context['page'] = page
+    context['search'] = search
+    context['configuraciones'] = configs
+
     return render(request, 'evado/configurar_universo_personas.html', context)
 
 
@@ -1449,12 +1469,5 @@ def import_eup_xls(request):
             messages.add_message(request, messages.SUCCESS, 'Se ha guardado la configuración de evaluados')
         else:
             messages.add_message(request, messages.WARNING, "El formulario tiene errores, favor revisar")
-    else:
-        form = ImportarConfiguracionUniversoPersonaForm(initial={'periodo_encuesta': PeriodoEncuesta.objects.filter(activo=True).first()})
-    context = {
-        'form': ConfigurarUniversoPersonaForm(initial={'periodo': PeriodoEncuesta.objects.filter(activo=True).first()}),
-        'formImport': form,
-        'configuraciones': ConfigurarEncuestaUniversoPersona.objects.order_by('persona', 'tipo_encuesta', 'periodo')
-    }
 
-    return render(request, 'evado/configurar_universo_personas.html', context)
+    return redirect('evado:configurar_universo_personas')
