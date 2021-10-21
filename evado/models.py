@@ -5,6 +5,7 @@ import hashlib
 from django.contrib.humanize.templatetags.humanize import naturalday
 from django.core.exceptions import ValidationError
 from django.urls import reverse
+from django.utils import timezone
 from django.db import models
 from random import getrandbits
 from rrhh.models import Persona
@@ -182,7 +183,7 @@ PERIODO_CHOICE = (
 
 class PeriodoEncuesta(models.Model):
     nombre = models.CharField(max_length=20)
-    anio = models.PositiveIntegerField(null=True, blank=True, verbose_name="Año")
+    anio = models.PositiveIntegerField(default=2021, verbose_name="Año")
     periodo = models.CharField(max_length=25, choices=PERIODO_CHOICE, null=True, blank=True)
     activo = models.BooleanField(default=False)
 
@@ -319,12 +320,12 @@ class UniversoEncuesta(models.Model):
             El Periodo es la clave para la creación de la encuesta
             y permanencia de distintas configuraciones con el mismo evaluador.
             así al seleccionar un evaluador (Persona),
-            solo se consideraran las configuraciones pertenecientes al periodo del Universo de Encuestas
+            solo se considerarán las configuraciones pertenecientes al periodo del Universo de Encuestas
             y no se crearán encuestas para todas las configuraciones de este evaluador
         :return: Diccionario de Aplicar Universo Encuesta Persona
         """
         aues = []
-        preguntas = self.encuesta.preguntaencuesta_set.all()
+        # preguntas = self.encuesta.preguntaencuesta_set.all()
         for evaluador in self.evaluadores.all():
             configs = ConfigurarEncuestaUniversoPersona.objects.filter(persona=evaluador, periodo=self.periodo)
             for cup in configs:
@@ -335,8 +336,10 @@ class UniversoEncuesta(models.Model):
                         evaluado=x,
                         tipo_encuesta=cup.tipo_encuesta
                     )
-                    if created or RespuestaAplicarUniversoEncuestaPersona.objects.filter(aplicar_universo_encuesta_persona=aue).count() < preguntas.count():
-                        aues.append(aue)
+                    """ Aquí solo se crean las auep, al ingresar a la encuesta, se cargar las preguntas para cada auep,
+                    asi el servidor no se colapsa al crear un nuevo universo """
+                    # if created or RespuestaAplicarUniversoEncuestaPersona.objects.filter(aplicar_universo_encuesta_persona=aue).count() < preguntas.count():
+                    #     aues.append(aue)
         return aues
 
     @property
@@ -345,6 +348,7 @@ class UniversoEncuesta(models.Model):
             'persona__infopersona__fundacion'
         ).order_by(
             'persona__infopersona__colegio',
+            'encuesta_finalizada',
             'persona'
         )
 
@@ -378,6 +382,7 @@ class PersonaUniversoEncuesta(models.Model):
     universo_encuesta = models.ForeignKey("UniversoEncuesta", on_delete=models.CASCADE,
                                           verbose_name="Universo de encuestas")
     correo_enviado = models.DateTimeField(null=True, blank=True, verbose_name="Fecha de envío de correo")
+    encuesta_finalizada = models.DateTimeField(null=True, blank=True)
     creado_en = models.DateTimeField(auto_now_add=True)
 
     @property
@@ -393,6 +398,27 @@ class PersonaUniversoEncuesta(models.Model):
             return True
         else:
             return False
+
+    def ha_finalizado(self):
+        finalizado = True
+        for auep in AplicarUniversoEncuestaPersona.objects.filter(
+                universo_encuesta=self.universo_encuesta,
+                persona=self.persona
+        ):
+            if not auep.finalizado:
+                finalizado = False
+                break
+
+        if finalizado:
+            self.encuesta_finalizada = timezone.now()
+            self.save()
+
+    @property
+    def total_encuestas(self):
+        return AplicarUniversoEncuestaPersona.objects.filter(
+            universo_encuesta=self.universo_encuesta,
+            persona=self.persona
+        ).count()
 
     def __str__(self):
         return '{}'.format(

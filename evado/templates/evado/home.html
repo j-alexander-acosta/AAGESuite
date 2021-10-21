@@ -1,5 +1,5 @@
 {% extends 'base/base.html' %}
-{% load humanize staticfiles%}
+{% load humanize staticfiles bootstrap_pagination %}
 
 {% block title_page %}
     Evaluación Docente
@@ -82,7 +82,7 @@
 
     <div class="card">
         <div class="tab-content">
-            <div class="tab-pane show active" id="first">
+            <div class="tab-pane {% if not page %}show active{% endif %}" id="first">
                 <div class="card-body">
                     {#                    <div class="dropdown float-right">#}
                     {#                        <a href="#" class="dropdown-toggle arrow-none card-drop" data-toggle="dropdown" aria-expanded="false">#}
@@ -159,24 +159,23 @@
                     <div class="table-responsive">
                         <table class="table table-centered table-nowrap table-hover mb-0">
                             <tbody>
-                            {% regroup encuestas_finalizadas by universo_encuesta as universos %}
-                            {% for universo in universos %}
+                            {% for ef in encuestas_finalizadas %}
                                 <tr>
                                     <td>
-                                        <h5 class="font-14 my-1"><a href="javascript:void(0);" class="text-body">{{ universo.grouper.encuesta.titulo }}</a></h5>
-                                        <span class="text-muted font-13"><em> {{ universo.grouper.periodo_activo }}</em></span>
+                                        <h5 class="font-14 my-1"><a href="javascript:void(0);" class="text-body">{{ ef.universo_encuesta.encuesta.titulo }}</a></h5>
+                                        <span class="text-muted font-13"><em> {{ ef.universo_encuesta.periodo_activo }}</em></span>
                                     </td>
                                     <td>
                                         <h5 class="font-14 my-1">Evaluador</h5>
-                                        <span class="font-14 mt-1 font-weight-normal">{{ universo.list.0.persona.get_name }}</span>
+                                        <span class="font-14 mt-1 font-weight-normal">{{ ef.persona.get_name }}</span>
                                     </td>
                                     <td>
                                         <h5 class="font-14 my-1">Total evaluaciones</h5>
-                                        <span class="font-14 mt-1 font-weight-normal">{{ universo.grouper.total_evaluaciones }}</span>
+                                        <span class="font-14 mt-1 font-weight-normal">{{ ef.total_encuestas }}</span>
                                     </td>
                                     <td>
                                         <h5 class="font-14 my-1">Finalizada</h5>
-                                        <span class="font-14 mt-1 font-weight-normal">{{ universo.list.0.finalizado|naturalday }}</span>
+                                        <span class="font-14 mt-1 font-weight-normal">{{ ef.encuesta_finalizada|naturalday }}</span>
                                     </td>
                                 </tr>
                             {% empty %}
@@ -189,7 +188,7 @@
 
                 </div> <!-- end card body-->
             </div>
-            <div class="tab-pane" id="third">
+            <div class="tab-pane {% if page %}show active{% endif %}" id="third">
                 <div class="card-body">
                     {#                    <div class="dropdown float-right">#}
                     {#                        <a href="#" class="dropdown-toggle arrow-none card-drop" data-toggle="dropdown" aria-expanded="false">#}
@@ -238,7 +237,7 @@
                             </tbody>
                         </table>
                     </div> <!-- end table-responsive-->
-
+                    {% bootstrap_paginate encuestas_rendidas range=5 show_first_last="true" %}
                 </div> <!-- end card body-->
             </div>
         </div>

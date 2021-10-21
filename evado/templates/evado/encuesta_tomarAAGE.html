@@ -203,7 +203,7 @@
                                                     </div>
                                                 </td>
                                                 <!-- inicio preguntas -->
-                                                {% include "encuesta/respuestas_template_part.html" with item=item codigo_evaluado="" aencuesta=aencuesta respuestas_encuesta=respuestas_encuesta only %}
+                                                {% include "evado/respuestas_template_part.html" with item=item codigo_evaluado="" aencuesta=aencuesta respuestas_encuesta=respuestas_encuesta only %}
                                                 <!-- fin preguntas -->
 
                                             {% else %}
@@ -213,7 +213,7 @@
                                                     {{ aencuesta.profesor.0.nombres }} {{ aencuesta.profesor.0.apellidos }}
                                                 </td>
                                                 <!-- inicio preguntas -->
-                                                {% include "encuesta/respuestas_template_part.html" with item=item codigo_evaluado=aencuesta.profesor.0.rut aencuesta=aencuesta respuestas_encuesta=respuestas_encuesta only %}
+                                                {% include "evado/respuestas_template_part.html" with item=item codigo_evaluado=aencuesta.profesor.0.rut aencuesta=aencuesta respuestas_encuesta=respuestas_encuesta only %}
                                                 <!-- fin preguntas -->
 
                                             {% endif %}
@@ -235,7 +235,7 @@
                                                 </td>
 
                                                 <!-- inicio preguntas -->
-                                                {% include "encuesta/respuestas_template_part.html" with item=item codigo_evaluado="" aencuesta=aencuesta respuestas_encuesta=respuestas_encuesta only %}
+                                                {% include "evado/respuestas_template_part.html" with item=item codigo_evaluado="" aencuesta=aencuesta respuestas_encuesta=respuestas_encuesta only %}
                                                 <!-- fin preguntas -->
 
                                             {% elif aencuesta.universo_encuesta.tipo_encuesta.codigo == "EN0002"  %}
@@ -246,7 +246,7 @@
                                                 </td>
 
                                                 <!-- inicio preguntas -->
-                                                {% include "encuesta/respuestas_template_part.html" with item=pregunta codigo_evaluado=aencuesta.evaluado.rut aencuesta=aencuesta respuestas_encuesta=respuestas_encuesta only %}
+                                                {% include "evado/respuestas_template_part.html" with item=pregunta codigo_evaluado=aencuesta.evaluado.rut aencuesta=aencuesta respuestas_encuesta=respuestas_encuesta only %}
                                                 <!-- fin preguntas -->
 
                                             {% elif aencuesta.universo_encuesta.tipo_encuesta.codigo == "EN0003" %}
@@ -263,7 +263,7 @@
                                                 </td>
 
                                                 <!-- inicio preguntas -->
-                                                {% include "encuesta/respuestas_template_part.html" with item=item codigo_evaluado=aencuesta.curso_profesor.rut aencuesta=aencuesta respuestas_encuesta=respuestas_encuesta only %}
+                                                {% include "evado/respuestas_template_part.html" with item=item codigo_evaluado=aencuesta.curso_profesor.rut aencuesta=aencuesta respuestas_encuesta=respuestas_encuesta only %}
                                                 <!-- fin preguntas -->
 
                                             {% elif aencuesta.universo_encuesta.tipo_encuesta.codigo == "EN0004" %}
@@ -272,7 +272,7 @@
                                                     <input type="hidden" value="{{ aencuesta.curso_profesor.codigo }}">
                                                     <b> {{ aencuesta.curso_profesor.codigo }} </b> - {{ aencuesta.curso_profesor.materia }}
                                                 </td>
-                                                {% include "encuesta/respuestas_template_part.html" with item=item codigo_evaluado=aencuesta.curso_profesor.codigo aencuesta=aencuesta respuestas_encuesta=respuestas_encuesta only %}
+                                                {% include "evado/respuestas_template_part.html" with item=item codigo_evaluado=aencuesta.curso_profesor.codigo aencuesta=aencuesta respuestas_encuesta=respuestas_encuesta only %}
                                             {% else %}
                                             {% endif %}
                                         {% endif %}

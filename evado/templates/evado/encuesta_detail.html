@@ -1,5 +1,5 @@
 {% extends 'base/base.html' %}
-{% load encuesta_extras crispy_forms_tags humanize %}
+{% load encuesta_extras crispy_forms_tags humanize bootstrap_pagination %}
 
 {% block title_page %}
     Encuesta - Detalle
@@ -25,13 +25,13 @@
         <div class="card-body">
             <ul class="nav nav-tabs nav-bordered mb-3">
                 <li class="nav-item">
-                    <a href="#home-b1" data-toggle="tab" aria-expanded="false" class="nav-link active">
+                    <a href="#home-b1" data-toggle="tab" aria-expanded="false" class="nav-link {% if not filtro and not page %}active{% endif %}">
                         <i class="mdi mdi-home-variant d-md-none d-block"></i>
                         <span class="d-none d-md-block">Encuesta</span>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#profile-b1" data-toggle="tab" aria-expanded="true" class="nav-link">
+                    <a href="#profile-b1" data-toggle="tab" aria-expanded="true" class="nav-link {% if filtro or page %}active{% endif %}">
                         <i class="mdi mdi-account-circle d-md-none d-block"></i>
                         <span class="d-none d-md-block">Registro de finalización</span>
                     </a>
@@ -39,31 +39,7 @@
             </ul>
 
             <div class="tab-content">
-                <div class="tab-pane" id="profile-b1">
-                    <div class="table-responsive">
-                        <table id="basic-datatable" class="table table-hover">
-                            <thead>
-                            <th>Evaluador</th>
-                            <th>Evaluados</th>
-                            <th>Estado</th>
-                            </thead>
-                            <tbody>
-                            {% for aplicar_encuesta in aplicar_encuestas %}
-                                <tr>
-                                    <td>{{ aplicar_encuesta.persona }}</td>
-                                    <td>{{ aplicar_encuesta.evaluado }}</td>
-                                    {% if aplicar_encuesta.finalizado %}
-                                        <td class="text-success">Finalizada el {{ aplicar_encuesta.finalizado }}
-                                            {% else %}
-                                        <td class="text-warning">Pendiente
-                                    {% endif %}</td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="tab-pane show active" id="home-b1">
+                <div class="tab-pane {% if not filtro and not page%}show active{% endif %}" id="home-b1">
                     {% regroup encuesta.obtener_preguntas_no_respuesta_directa by categoria as preguntas %}
                     {% for x in preguntas %}
                         <div class="my-1">
@@ -143,6 +119,51 @@
                             {% endfor %}
                         </ol>
                     {% endfor %}
+                </div>
+                <div class="tab-pane {% if filtro or page %}show active{% endif %}" id="profile-b1">
+                    <div class="my-2">
+                        <div class="row">
+                            <form class="col-md-4" role="form" method="GET">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="search" placeholder="Buscar">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-info" type="submit"><i class="uil-search"></i></button>
+                                    </div>
+                                </div>
+                            </form>
+                            {% if filtro %}
+                                <div class="col-md-8">
+                                    Búsqueda: <em>{{ search }}</em><br>Total de resultados: <em>{{ total_resultados }}</em>
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% if filtro %}
+                            <a class="small" href="{{ request.path }}">Limpiar Listado</a>
+                        {% endif %}
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                            <th>Evaluador</th>
+                            <th>Evaluado</th>
+                            <th>Estado</th>
+                            </thead>
+                            <tbody>
+                            {% for aplicar_encuesta in aplicar_encuestas %}
+                                <tr>
+                                    <td>{{ aplicar_encuesta.persona }}</td>
+                                    <td>{{ aplicar_encuesta.evaluado }}</td>
+                                    {% if aplicar_encuesta.finalizado %}
+                                        <td class="text-success">Finalizada el {{ aplicar_encuesta.finalizado }}
+                                            {% else %}
+                                        <td class="text-warning">Pendiente
+                                    {% endif %}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% bootstrap_paginate aplicar_encuestas range=5 show_first_last="true" %}
                 </div>
             </div>
         </div>
