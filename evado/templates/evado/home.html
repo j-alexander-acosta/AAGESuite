@@ -72,8 +72,8 @@
                 <div class="m-0 border-left">
                     <div class="card-body text-center">
                         <i class="dripicons-document-edit text-muted" style="font-size: 32px;"></i>
-                        <h3><span>{{ total_ultimas_rendidas }}</span></h3>
-                        <p class="text-muted font-15 mb-0">Últimas rendidas <small> hace 2 días </small></p>
+                        <h3><span>{{ total_colegios }}</span></h3>
+                        <p class="text-muted font-15 mb-0">Total Colegios</p>
                     </div>
                 </div>
             </a>
@@ -100,9 +100,6 @@
                     {#                        </div>#}
                     {#                    </div>#}
                     <h4 class="header-title mb-3">Encuestas Habilitadas</h4>
-
-                    {#                    <p><b>107</b> Tasks completed out of 195</p>#}
-
                     <div class="table-responsive">
                         <table class="table table-centered table-nowrap table-hover mb-0">
                             <tbody>
@@ -113,7 +110,7 @@
                                         <span class="text-muted font-13"><em>{{ x.periodo_activo }}</em> </span>
                                     </td>
                                     <td class="text-center">
-                                        <h5 class="font-14 my-1">Evaluadores</h5>
+                                        <h5 class="font-14 my-1">Total evaluadores</h5>
                                         <h4 class="text-muted font-14">{{ x.total_evaluadores }}</h4>
                                     </td>
                                     <td class="text-center">
@@ -137,25 +134,7 @@
             </div>
             <div class="tab-pane {% if page %}show active{% endif %}" id="second">
                 <div class="card-body">
-                    {#                    <div class="dropdown float-right">#}
-                    {#                        <a href="#" class="dropdown-toggle arrow-none card-drop" data-toggle="dropdown" aria-expanded="false">#}
-                    {#                            <i class="mdi mdi-dots-vertical"></i>#}
-                    {#                        </a>#}
-                    {#                        <div class="dropdown-menu dropdown-menu-right" style="">#}
-                    {#                            <!-- item-->#}
-                    {#                            <a href="javascript:void(0);" class="dropdown-item">Weekly Report</a>#}
-                    {#                            <!-- item-->#}
-                    {#                            <a href="javascript:void(0);" class="dropdown-item">Monthly Report</a>#}
-                    {#                            <!-- item-->#}
-                    {#                            <a href="javascript:void(0);" class="dropdown-item">Action</a>#}
-                    {#                            <!-- item-->#}
-                    {#                            <a href="javascript:void(0);" class="dropdown-item">Settings</a>#}
-                    {#                        </div>#}
-                    {#                    </div>#}
                     <h4 class="header-title mb-3">Encuestas terminadas</h4>
-
-                    {#                    <p><b>107</b> Tasks completed out of 195</p>#}
-
                     <div class="table-responsive">
                         <table class="table table-centered table-nowrap table-hover mb-0">
                             <tbody>
@@ -169,7 +148,7 @@
                                         <h5 class="font-14 my-1">Evaluador</h5>
                                         <span class="font-14 mt-1 font-weight-normal">{{ ef.persona.get_name }}</span>
                                     </td>
-                                    <td>
+                                    <td class="text-center">
                                         <h5 class="font-14 my-1">Total evaluaciones</h5>
                                         <span class="font-14 mt-1 font-weight-normal">{{ ef.total_encuestas }}</span>
                                     </td>
@@ -190,45 +169,34 @@
             </div>
             <div class="tab-pane" id="third">
                 <div class="card-body">
-                    {#                    <div class="dropdown float-right">#}
-                    {#                        <a href="#" class="dropdown-toggle arrow-none card-drop" data-toggle="dropdown" aria-expanded="false">#}
-                    {#                            <i class="mdi mdi-dots-vertical"></i>#}
-                    {#                        </a>#}
-                    {#                        <div class="dropdown-menu dropdown-menu-right" style="">#}
-                    {#                            <!-- item-->#}
-                    {#                            <a href="javascript:void(0);" class="dropdown-item">Weekly Report</a>#}
-                    {#                            <!-- item-->#}
-                    {#                            <a href="javascript:void(0);" class="dropdown-item">Monthly Report</a>#}
-                    {#                            <!-- item-->#}
-                    {#                            <a href="javascript:void(0);" class="dropdown-item">Action</a>#}
-                    {#                            <!-- item-->#}
-                    {#                            <a href="javascript:void(0);" class="dropdown-item">Settings</a>#}
-                    {#                        </div>#}
-                    {#                    </div>#}
-                    <h4 class="header-title mb-3">Últimas encuestas rendidas</h4>
-
-                    {#                    <p><b>107</b> Tasks completed out of 195</p>#}
-
+                    <h4 class="header-title mb-3">Encuestas por Colegio</h4>
                     <div class="table-responsive">
                         <table id="basic-datatable" class="table table-centered table-nowrap table-hover mb-0">
+                            <thead style="display: none">
+                            <th>Colegio</th>
+                            <th>Total evaluadores</th>
+                            <th>Total evaluaciones</th>
+                            <th>Total finalizadas</th>
+                            </thead>
                             <tbody>
-                            {% for x in encuestas_rendidas %}
+                            {% for x in encuestas_colegio %}
                                 <tr>
                                     <td>
-                                        <h5 class="font-14 my-1"><a href="javascript:void(0);" class="text-body">{{ x.universo_encuesta.encuesta.titulo }} ({{ x.tipo_encuesta }})</a></h5>
-                                        <span class="text-muted font-13"><em> {{ x.universo_encuesta.periodo_activo }}</em></span>
+                                        <h5 class="font-14 my-1"><a href="javascript:void(0);" class="text-body">{{ x.persona__infopersona__colegio }}</a></h5>
+                                        <span class="text-muted font-13"><em> {{ x.persona__infopersona__fundacion }}</em></span><br>
+                                        <span class="text-muted font-13"><em> {{ x.universo_encuesta__periodo__nombre }}</em></span>
                                     </td>
-                                    <td>
-                                        <h5 class="font-14 my-1">Evaluador</h5>
-                                        <span class="font-14 mt-1 font-weight-normal">{{ x.persona.get_name }}</span>
+                                    <td class="text-center">
+                                        <h5 class="font-14 my-1">Total evaluadores</h5>
+                                        <span class="font-14 mt-1 font-weight-normal">{{ x.total_evaluadores }}</span>
                                     </td>
-                                    <td>
-                                        <h5 class="font-14 my-1">Evaluado</h5>
-                                        <span class="font-14 mt-1 font-weight-normal">{{ x.evaluado.get_name }}</span>
+                                    <td class="text-center">
+                                        <h5 class="font-14 my-1">Total evaluaciones</h5>
+                                        <span class="font-14 mt-1 font-weight-normal">{{ x.total_evaluaciones }}</span>
                                     </td>
-                                    <td>
-                                        <h5 class="font-14 my-1">Finalizada</h5>
-                                        <span class="font-14 mt-1 font-weight-normal">{{ x.finalizado|naturalday }}</span>
+                                    <td class="text-center">
+                                        <h5 class="font-14 my-1">Total finalizadas</h5>
+                                        <span class="font-14 mt-1 font-weight-normal">{{ x.total_finalizadas }}</span>
                                     </td>
                                 </tr>
                             {% empty %}
@@ -239,6 +207,39 @@
                     </div> <!-- end table-responsive-->
                 </div> <!-- end card body-->
             </div>
+{#            <div class="tab-pane" id="third">#}
+{#                <div class="card-body">#}
+{#                    <h4 class="header-title mb-3">Últimas encuestas rendidas</h4>#}
+{#                    <div class="table-responsive">#}
+{#                        <table id="basic-datatable" class="table table-centered table-nowrap table-hover mb-0">#}
+{#                            <tbody>#}
+{#                            {% for x in encuestas_rendidas %}#}
+{#                                <tr>#}
+{#                                    <td>#}
+{#                                        <h5 class="font-14 my-1"><a href="javascript:void(0);" class="text-body">{{ x.universo_encuesta.encuesta.titulo }} ({{ x.tipo_encuesta }})</a></h5>#}
+{#                                        <span class="text-muted font-13"><em> {{ x.universo_encuesta.periodo_activo }}</em></span>#}
+{#                                    </td>#}
+{#                                    <td>#}
+{#                                        <h5 class="font-14 my-1">Evaluador</h5>#}
+{#                                        <span class="font-14 mt-1 font-weight-normal">{{ x.persona.get_name }}</span>#}
+{#                                    </td>#}
+{#                                    <td>#}
+{#                                        <h5 class="font-14 my-1">Evaluado</h5>#}
+{#                                        <span class="font-14 mt-1 font-weight-normal">{{ x.evaluado.get_name }}</span>#}
+{#                                    </td>#}
+{#                                    <td>#}
+{#                                        <h5 class="font-14 my-1">Finalizada</h5>#}
+{#                                        <span class="font-14 mt-1 font-weight-normal">{{ x.finalizado|naturalday }}</span>#}
+{#                                    </td>#}
+{#                                </tr>#}
+{#                            {% empty %}#}
+{#                                No existen datos#}
+{#                            {% endfor %}#}
+{#                            </tbody>#}
+{#                        </table>#}
+{#                    </div> <!-- end table-responsive-->#}
+{#                </div> <!-- end card body-->#}
+{#            </div>#}
         </div>
     </div> <!-- end card -->
 

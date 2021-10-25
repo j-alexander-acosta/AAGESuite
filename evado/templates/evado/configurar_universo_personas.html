@@ -69,26 +69,7 @@
     <div class="card">
         <div class="card-body">
             <h4>Configuración de evaluados</h4>
-            <div class="my-2">
-                <div class="row">
-                    <form class="col-md-4" role="form" method="GET">
-                        <div class="input-group">
-                            <input type="text" class="form-control" name="search" placeholder="Buscar">
-                            <div class="input-group-append">
-                                <button class="btn btn-info" type="submit"><i class="uil-search"></i></button>
-                            </div>
-                        </div>
-                    </form>
-                    {% if search %}
-                        <div class="col-md-8">
-                            <strong>Búsqueda:</strong> <em>{{ search }}</em><br><strong>Total de resultados:</strong> <em>{{ total_resultados }}</em>
-                        </div>
-                    {% endif %}
-                </div>
-                {% if search %}
-                    <a class="small" href="{{ request.path }}">Limpiar Listado</a>
-                {% endif %}
-            </div>
+            {% include 'base/partials/buscar_input.html' %}
             <div class="table-responsive">
                 <table class="table table-bordered table-hover">
                     <thead>

@@ -1,0 +1,21 @@
+<div class="my-2 float-right ">
+    <form role="form" method="GET">
+        <div class="input-group">
+            <label for="colFormLabelSm" class="col-form-label col-form-label-sm pr-2">Buscar: </label>
+            <input type="text" class="form-control form-control-sm" id="colFormLabelSm" name="search">
+        </div>
+    </form>
+    {% if search %}
+        <div class="row mt-1">
+            <div class="px-2 small">
+                <strong>Total de resultados:</strong> <em>{{ total_resultados }}</em>
+            </div>
+            <div class="pr-2 small">
+                <strong>Búsqueda:</strong> <em>{{ search }}</em>
+            </div>
+            <div class="pr-2">
+                <a class="small" href="{{ request.path }}">Limpiar listado</a>
+            </div>
+        </div>
+    {% endif %}
+</div>

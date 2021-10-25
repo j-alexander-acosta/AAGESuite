@@ -9,26 +9,7 @@
             </h5>
         </div>
         <div class="card-body">
-            <div class="row">
-                <form class="col-md-4" role="form" method="GET">
-                    <div class="input-group custom-search-form">
-                        <input type="text" class="form-control" name="q" placeholder="Buscar">
-                        <span class="input-group-btn">
-                        <button class="btn btn-info" type="submit">
-                            <span class="uil-search"></span>
-                        </button>
-                    </span>
-                    </div><!-- /input-group -->
-                </form>
-                {% if filtro %}
-                    <div class="col-md-8">
-                        Búsqueda: <em>{{ search }}</em><br>Total de resultados: <em>{{ object_list|length }}</em>
-                    </div>
-                {% endif %}
-            </div>
-            {% if filtro %}
-                <a class="small" href="{{ request.path }}">Limpiar Listado</a>
-            {% endif %}
+            {% include 'base/partials/buscar_input.html' %}
             <div class="table-responsive">
                 {% block table %}
                 {% endblock %}

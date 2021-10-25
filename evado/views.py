@@ -13,20 +13,18 @@ from django.core.exceptions import MultipleObjectsReturned
 from django.core.mail import EmailMultiAlternatives
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.core.validators import validate_email
-from django.db.models import Q, Count, SlugField, Value
+from django.db.models import Q, Count, Value, Sum, Case, When, IntegerField
 from django.db.models.functions import Concat
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template import Context
 from django.template.loader import get_template
 from django.urls import reverse_lazy
-from django.utils import timezone
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.views.generic.edit import ModelFormMixin
 from extra_views import InlineFormSetView, InlineFormSetFactory
 from jsonview.decorators import json_view
 from django.conf import settings
-from psycopg2 import Date
 
 from evado.mixins import LoginRequired, SuccessOrErrorMessageMixin
 from evado.forms import *
@@ -37,12 +35,13 @@ from evado.models import *
 def home(request):
     context = {}
     now = timezone.now().date()
-    two_days_before = now - datetime.timedelta(days=2)
     encuestas_habilitadas = UniversoEncuesta.objects.filter(fin__gte=now)
     context['encuestas_habilitadas'] = encuestas_habilitadas
 
     encuestas_finalizadas = []
+    encuestas_colegio = []
     total_encuestas_finalizadas = 0
+    total_colegios = 0
     for universo_encuesta in encuestas_habilitadas:
         pues = universo_encuesta.personauniversoencuesta_set.filter(
             encuesta_finalizada__isnull=False
@@ -50,18 +49,41 @@ def home(request):
         total_encuestas_finalizadas += pues.count()
         for pue in pues:
             encuestas_finalizadas.append(pue)
+
+        aueps = universo_encuesta.aplicaruniversoencuestapersona_set.order_by(
+            'universo_encuesta__encuesta__titulo',
+            'universo_encuesta__periodo__nombre',
+            'persona__infopersona__fundacion',
+            'persona__infopersona__colegio',
+        ).values(
+            'universo_encuesta__encuesta__titulo',
+            'universo_encuesta__periodo__nombre',
+            'persona__infopersona__fundacion',
+            'persona__infopersona__colegio',
+        ).annotate(
+            total_evaluadores=Count('persona', distinct=True),
+            total_evaluaciones=Count('persona'),
+            total_finalizadas=Sum(
+                Case(
+                    When(finalizado__isnull=False, then=1),
+                    default=0,
+                    output_field=IntegerField()
+                )
+            )
+        )
+        print(aueps)
+        for auep in aueps:
+            total_colegios += 1
+            encuestas_colegio.append(auep)
+
     context['total_encuestas_finalizadas'] = total_encuestas_finalizadas
     page = request.GET.get('page')
     encuestas_finalizadas = paginador(encuestas_finalizadas, page)
     context['encuestas_finalizadas'] = encuestas_finalizadas
     context['page'] = page
 
-    auep = AplicarUniversoEncuestaPersona.objects.filter(
-        finalizado__gte=two_days_before
-    ).order_by(
-        '-finalizado'
-    )
-    context['encuestas_rendidas'] = auep
+    context['encuestas_colegio'] = encuestas_colegio
+    context['total_colegios'] = total_colegios
 
     return render(request, 'evado/home.html', context)
 
