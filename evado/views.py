@@ -30,6 +30,7 @@ from evado.mixins import LoginRequired, SuccessOrErrorMessageMixin
 from evado.forms import *
 from evado.models import *
 from evado.reports import *
+from rrhh.templatetags.rrhh_utils import decrypt_phrase_from_url
 
 
 @login_required
@@ -1601,6 +1602,7 @@ def ver_pdf_resultado(request, pk):
 
 @login_required
 def descargar_resultados_colegio(request, id_universo_encusta, colegio):
+    colegio = decrypt_phrase_from_url(colegio)
     universo = get_object_or_404(
         UniversoEncuesta,
         id=id_universo_encusta
@@ -1612,6 +1614,7 @@ def descargar_resultados_colegio(request, id_universo_encusta, colegio):
 
 @login_required
 def resultados_colegio(request, colegio):
+    colegio = decrypt_phrase_from_url(colegio)
     context = {}
     resultados = ResultadoPersona.objects.filter(
         persona__infopersona__colegio__icontains=colegio

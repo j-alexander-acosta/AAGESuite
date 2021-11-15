@@ -45,3 +45,12 @@ def get_word(value, arg):
 def get_real_month(value):
     return months[value]
 
+
+@register.filter
+def encrypt_phrase_for_url(value):
+    return value.replace(' ', '_')
+
+
+@register.filter
+def decrypt_phrase_from_url(value):
+    return value.replace('_', ' ')
