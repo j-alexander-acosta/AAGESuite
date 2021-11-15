@@ -45,8 +45,9 @@
                         <a class="btn btn-outline-primary" href="{% url 'evado:universo_encuesta_edit' o.pk %}"
                            data-toggle="tooltip" data-placement="top" title="Editar">
                             <i class="uil-edit"></i></a>
-                        <a class="btn btn-outline-success" href="{% url 'evado:actualizar_encuestas_universo' o.pk %}">
-                            <i class="uil-refresh"></i> Actualizar encuestas</a>
+                        <a class="btn btn-outline-success" href="{% url 'evado:actualizar_encuestas_universo' o.pk %}"
+                            data-toggle="tooltip" data-placement="top" title="Actualizar encuestas">
+                            <i class="uil-refresh"></i></a>
                         <a class="btn btn-outline-warning" href="{% url 'evado:resultados_universo_encuesta' o.pk %}"
                             data-toggle="tooltip" data-placement="top" title="Ver resultados">
                             <i class="uil-chart-line"></i></a>

@@ -11,10 +11,14 @@ from reportlab.lib.units import cm
 from reportlab.platypus import Frame, NextPageTemplate, PageTemplate
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, PageBreak, Image
 
+from django.conf import settings
 from evado.models import Ponderacion
 from rrhh.templatetags.rrhh_utils import get_real_month
 
-PATH_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)))
+if settings.DEBUG:
+    PATH_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)))
+else:
+    PATH_FILE = os.path.join(os.path.dirname(__file__))
 
 styles = getSampleStyleSheet()
 styles.add(ParagraphStyle(name="MyTitle", parent=styles['Title'], leading=9, fontSize=14))

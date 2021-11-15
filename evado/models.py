@@ -564,7 +564,6 @@ class AplicarUniversoEncuestaPersona(models.Model):
             aplicar_universo_encuesta_persona__in=aueps,
             respuesta__isnull=False
         ).order_by('pregunta')
-        print(self.evaluado)
         if respuestas.exists():
             respuestas_pregunta = respuestas.values(
                 'pregunta'
@@ -640,7 +639,6 @@ class AplicarUniversoEncuestaPersona(models.Model):
                 )
             )
             for r in respuestas_pregunta:
-                print(r)
                 pregunta = get_object_or_404(PreguntaEncuesta, id=r['pregunta'])
                 rpp, rpp_created = ResultadoPreguntaPersona.objects.get_or_create(
                     resultado_persona=rp,
@@ -665,15 +663,9 @@ class AplicarUniversoEncuestaPersona(models.Model):
                 if rpp.promedio_pares == 0:
                     hay_pares = False
 
-                print(rpp.promedio_directivos)
-                print(rpp.promedio_pares)
-                print(rpp.promedio_autoevaluacion)
-
                 ponderaciones = self.universo_encuesta.ponderacion_set.all()
                 for ponderacion in ponderaciones:
                     ponde = ponderacion.ponderacion
-                    print("AQUI")
-                    print(self.universo_encuesta.ponderacion_tipo_encuesta("EN0001"))
                     if ponderacion.tipo_encuesta.codigo == 'EN0000':
                         if not hay_pares:
                             ponde += self.universo_encuesta.ponderacion_tipo_encuesta("EN0001")
@@ -686,10 +678,6 @@ class AplicarUniversoEncuestaPersona(models.Model):
                         if not hay_pares and not hay_autoevaluacion:
                             ponde += self.universo_encuesta.ponderacion_tipo_encuesta("EN0000") + self.universo_encuesta.ponderacion_tipo_encuesta("EN0001")
                         rpp.peso_directivos = rpp.promedio_directivos * (ponde / 100)
-
-                print(rpp.peso_directivos)
-                print(rpp.peso_pares)
-                print(rpp.peso_autoevaluacion)
 
                 rpp.nota = rpp.peso_autoevaluacion + rpp.peso_pares + rpp.peso_directivos
                 rpp.save()

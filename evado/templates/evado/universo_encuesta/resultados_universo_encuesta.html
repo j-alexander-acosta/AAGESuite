@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block title %}
-    Resultados {% if colegio %}{{ colegio }}{% else %}{{ universo }} <small>{{ universo.periodo }}</small>{% endif %}
+    Resultados {% if colegio %}{{ colegio }}{% else %}<small>{{ universo }} {{ universo.periodo }}</small>{% endif %}
 {% endblock %}
 
 {% block breadcrumb %}
@@ -215,7 +215,6 @@
     <script>
         let options = {
             chart: {
-                height: 375,
                 type: 'line'
             },
             series: [
