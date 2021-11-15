@@ -333,3 +333,63 @@ class RespuestaAplicarUniversoEncuestaPersonaAdmin(admin.ModelAdmin):
         'aplicar_universo_encuesta_persona__evaluado__apellido_paterno',
         'aplicar_universo_encuesta_persona__evaluado__apellido_materno',
     ]
+
+
+@admin.register(Ponderacion)
+class PonderacionAdmin(admin.ModelAdmin):
+    list_display = (
+        'universo_encuesta',
+        'tipo_encuesta',
+        'ponderacion'
+    )
+    list_filter = ['tipo_encuesta', 'universo_encuesta']
+
+
+@admin.register(ResultadoPersona)
+class ResultadoPersonaAdmin(admin.ModelAdmin):
+    list_display = (
+        'persona',
+        'universo_encuesta',
+        'nota'
+    )
+    list_filter = ['universo_encuesta', 'persona']
+    search_fields = [
+        'persona__rut',
+        'persona__nombres',
+        'persona__apellido_paterno',
+        'persona__apellido_materno'
+    ]
+
+
+@admin.register(ResultadoPreguntaPersona)
+class ResultadoPreguntaPersonaAdmin(admin.ModelAdmin):
+    list_display = (
+        'resultado_persona',
+        'pregunta',
+        'nota'
+    )
+    list_filter = ['pregunta', 'resultado_persona']
+
+
+class NivelInline(admin.TabularInline):
+    model = Nivel
+    extra = 1
+
+
+@admin.register(EscalaDesempeno)
+class EscalaDesempenoAdmin(admin.ModelAdmin):
+    inlines = [NivelInline]
+    list_display = (
+        'nombre',
+    )
+    search_fields = ['nombre']
+
+
+@admin.register(EscalaValoracion)
+class EscalaValoracionAdmin(admin.ModelAdmin):
+    list_display = (
+        'aspecto',
+        'min',
+        'max',
+    )
+    search_fields = ['aspecto']

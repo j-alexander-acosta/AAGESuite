@@ -176,9 +176,16 @@
                                             <p class="mb-0 mt-1 mx-2 font-12 text-muted" style="line-height: 14px">Ciclos de Calidad</p>
                                         </a>
                                     </div>
-                                    {% if request.user.perfilusuario.es_director or request.user.is_staff %}
+                                    {% if request.user.is_staff %}
                                         <div class="col-md-4">
                                             <a class="dropdown-icon-item" href="{% url 'evado:home_evado' %}">
+                                                <img src="{% static 'base/img/Evaluación-Docente-Personalizado.png' %}" alt="Evaluación Docente">
+                                                <p class="mb-0 mt-1 font-12 text-muted" style="line-height: 14px">Evaluación Docente</p>
+                                            </a>
+                                        </div>
+                                    {% elif request.user.perfilusuario.es_director %}
+                                        <div class="col-md-4">
+                                            <a class="dropdown-icon-item" href="{% url 'evado:resultados_colegio' request.user.persona.infopersona.colegio %}">
                                                 <img src="{% static 'base/img/Evaluación-Docente-Personalizado.png' %}" alt="Evaluación Docente">
                                                 <p class="mb-0 mt-1 font-12 text-muted" style="line-height: 14px">Evaluación Docente</p>
                                             </a>

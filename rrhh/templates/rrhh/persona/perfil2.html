@@ -10,10 +10,12 @@
 {% endblock %}
 
 {% block breadcrumb %}
-    <li class="breadcrumb-item"><a href="{% url 'home' %}">Suite AAGE</a></li>
-    <li class="breadcrumb-item"><a href="{% url 'rrhh:home_rrhh' %}">Recursos Humanos</a></li>
-    <li class="breadcrumb-item"><a href="{% url 'rrhh:personas' %}">Personas</a></li>
-    <li class="breadcrumb-item active">Perfil de usuario</li>
+    {% if request.META.HTTP_REFERER|end_with:"personas/" %}
+        <li class="breadcrumb-item"><a href="{% url 'home' %}">Suite AAGE</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'rrhh:home_rrhh' %}">Recursos Humanos</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'rrhh:personas' %}">Personas</a></li>
+        <li class="breadcrumb-item active">Perfil de usuario</li>
+    {% endif %}
 {% endblock %}
 
 {% block content %}

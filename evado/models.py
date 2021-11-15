@@ -4,6 +4,7 @@ import hashlib
 
 from django.contrib.humanize.templatetags.humanize import naturalday
 from django.core.exceptions import ValidationError
+from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils import timezone
 from django.db import models
@@ -50,9 +51,28 @@ class ConfigurarEncuestaUniversoPersona(models.Model):
         )
 
 
+class EscalaValoracion(models.Model):
+    aspecto = models.CharField(max_length=100, verbose_name="Aspecto a valorar")
+    min = models.PositiveIntegerField(verbose_name="Valor mínimo")
+    max = models.PositiveIntegerField(verbose_name="Valor máximo")
+
+    def __str__(self):
+        return '{} ({} - {})'.format(
+            self.aspecto,
+            self.min,
+            self.max
+        )
+
+    class Meta:
+        verbose_name = u'Escala de valoración'
+        verbose_name_plural = u'Escalas de valoración'
+
+
 class Encuesta(models.Model):
-    titulo = models.CharField(max_length=255)
+    titulo = models.CharField(max_length=255, verbose_name="Título")
     descripcion = models.TextField(verbose_name="Descripción")
+    indice_confiabilidad = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True, verbose_name="Índice de confiabilidad")
+    escala_valoracion = models.ForeignKey("EscalaValoracion", on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Escala de valoración")
     creado_en = models.DateTimeField(auto_now_add=True)
 
     def get_absolute_url(self):
@@ -232,23 +252,60 @@ class TipoUniversoEncuesta(models.Model):
         return self.nombre
 
 
+class EscalaDesempeno(models.Model):
+    nombre = models.CharField(max_length=250)
+
+    def nivelar(self, nota):
+        if nota:
+            for n in self.nivel_set.all():
+                if n.min <= nota <= n.max:
+                    return n.nivel
+        return "No tiene nivel"
+
+    def __str__(self):
+        return self.nombre
+
+    class Meta:
+        verbose_name = u'Escala de desempeño'
+        verbose_name_plural = u'Escalas de desempeño'
+
+
+class Nivel(models.Model):
+    escala_desempeno = models.ForeignKey('EscalaDesempeno', on_delete=models.CASCADE, verbose_name="Escala de desempeño")
+    nivel = models.CharField(max_length=100, verbose_name="Nivel de desempeño")
+    min = models.DecimalField(max_digits=3, decimal_places=1, verbose_name="Valor mínimo")
+    max = models.DecimalField(max_digits=3, decimal_places=1, verbose_name="Valor máximo")
+
+    def __str__(self):
+        return '{} ({} - {})'.format(
+            self.nivel,
+            self.min,
+            self.max
+        )
+
+    class Meta:
+        verbose_name = u'Nivel de desempeño'
+        verbose_name_plural = u'Niveles de desempeño'
+
+
 class UniversoEncuesta(models.Model):
     """
         El tipo de encuesta, en el Universo de encuesta,
-        representa el tipo de encuesta a desarrollar (distribucion de preguntas y evaluados)
+        representa el tipo de encuesta a desarrollar (distribución de preguntas y evaluados)
     """
     encuesta = models.ForeignKey("Encuesta", on_delete=models.CASCADE)
+    periodo = models.ForeignKey('PeriodoEncuesta', on_delete=models.CASCADE, verbose_name="Grupo de encuesta")
+    tipo_encuesta = models.ForeignKey('TipoUniversoEncuesta', on_delete=models.CASCADE, verbose_name="Tipo de encuesta")
     evaluadores = models.ManyToManyField(Persona, verbose_name='Evaluadores')
+    escala_desempeno = models.ForeignKey('EscalaDesempeno', on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Escala de desempeño")
     contenido_email = models.TextField(verbose_name="Contenido del correo electrónico")
     inicio = models.DateField()
     fin = models.DateField()
-    tipo_encuesta = models.ForeignKey('TipoUniversoEncuesta', on_delete=models.CASCADE, verbose_name="Tipo de encuesta")
-    periodo = models.ForeignKey('PeriodoEncuesta', on_delete=models.CASCADE, verbose_name="Grupo de encuesta")
     activar_campo_comentario = models.BooleanField(default=False)
-    creado_en = models.DateTimeField(auto_now_add=True)
-    modificado_en = models.DateTimeField(auto_now=True)
     correos_enviados = models.DateTimeField(null=True, blank=True, verbose_name="Fecha de envío de correos")
     creado = models.BooleanField(default=False)
+    creado_en = models.DateTimeField(auto_now_add=True)
+    modificado_en = models.DateTimeField(auto_now=True)
 
     @property
     def periodo_activo(self):
@@ -352,6 +409,15 @@ class UniversoEncuesta(models.Model):
             'persona'
         )
 
+    @property
+    def resultados_personas(self):
+        return self.resultadopersona_set.all().order_by(
+            'persona__infopersona__fundacion'
+        ).order_by(
+            'persona__infopersona__colegio',
+            'nota'
+        )
+
     def ultima_pregunta_respondida(self, persona):
         ultima_pregunta = None
         for auep in self.aplicaruniversoencuestapersona_set.filter(persona=persona):
@@ -364,6 +430,9 @@ class UniversoEncuesta(models.Model):
                     ultima_pregunta = pregunta
         return ultima_pregunta
 
+    def ponderacion_tipo_encuesta(self, codigo):
+        return self.ponderacion_set.filter(tipo_encuesta__codigo=codigo).first().ponderacion
+
     def get_absolute_url(self):
         return reverse('evado:universo_encuesta_detail', kwargs={'pk': self.pk})
 
@@ -375,6 +444,24 @@ class UniversoEncuesta(models.Model):
 
     class Meta:
         ordering = ['creado_en']
+
+
+class Ponderacion(models.Model):
+    universo_encuesta = models.ForeignKey('UniversoEncuesta', on_delete=models.CASCADE, verbose_name="Universo de encuestas")
+    tipo_encuesta = models.ForeignKey('TipoUniversoEncuesta', on_delete=models.CASCADE, verbose_name="Tipo de encuesta")
+    ponderacion = models.PositiveIntegerField(verbose_name="Ponderación")
+
+    def __str__(self):
+        return '{}, {} - {}'.format(
+            self.universo_encuesta,
+            self.tipo_encuesta,
+            self.ponderacion
+        )
+
+    class Meta:
+        unique_together = ['universo_encuesta', 'tipo_encuesta']
+        verbose_name = u'Ponderación'
+        verbose_name_plural = u'Ponderaciones'
 
 
 class PersonaUniversoEncuesta(models.Model):
@@ -464,6 +551,157 @@ class AplicarUniversoEncuestaPersona(models.Model):
             name = u""
         return name
 
+    def calcular_resultados(self):
+        aueps = AplicarUniversoEncuestaPersona.objects.filter(evaluado=self.evaluado, finalizado__isnull=False)
+        # pendientes = aueps.filter(finalizado__isnull=True).exists()
+        # if not pendientes:
+        rp, created = ResultadoPersona.objects.get_or_create(
+            persona=self.evaluado,
+            universo_encuesta=self.universo_encuesta
+        )
+        notas_preguntas = []
+        respuestas = RespuestaAplicarUniversoEncuestaPersona.objects.filter(
+            aplicar_universo_encuesta_persona__in=aueps,
+            respuesta__isnull=False
+        ).order_by('pregunta')
+        print(self.evaluado)
+        if respuestas.exists():
+            respuestas_pregunta = respuestas.values(
+                'pregunta'
+            ).annotate(
+                respuestas_cero_autoevaluacion=models.Sum(
+                    models.Case(
+                        models.When(aplicar_universo_encuesta_persona__tipo_encuesta__codigo='EN0000',
+                                    respuesta__peso=0, then=1),
+                        default=0,
+                        output_field=models.IntegerField()
+                    )
+                ),
+                total_autoevaluacion=models.Sum(
+                    models.Case(
+                        models.When(aplicar_universo_encuesta_persona__tipo_encuesta__codigo='EN0000',
+                                    respuesta__peso__gte=1, then=1),
+                        default=0,
+                        output_field=models.IntegerField()
+                    )
+                ),
+                suma_autoevaluacion=models.Sum(
+                    models.Case(
+                        models.When(aplicar_universo_encuesta_persona__tipo_encuesta__codigo='EN0000', then='respuesta__peso'),
+                        default=0,
+                        output_field=models.IntegerField()
+                    )
+                ),
+                respuestas_cero_pares=models.Sum(
+                    models.Case(
+                        models.When(aplicar_universo_encuesta_persona__tipo_encuesta__codigo='EN0001',
+                                    respuesta__peso=0, then=1),
+                        default=0,
+                        output_field=models.IntegerField()
+                    )
+                ),
+                total_pares=models.Sum(
+                    models.Case(
+                        models.When(aplicar_universo_encuesta_persona__tipo_encuesta__codigo='EN0001',
+                                    respuesta__peso__gte=1, then=1),
+                        default=0,
+                        output_field=models.IntegerField()
+                    )
+                ),
+                suma_pares=models.Sum(
+                    models.Case(
+                        models.When(aplicar_universo_encuesta_persona__tipo_encuesta__codigo='EN0001', then='respuesta__peso'),
+                        default=0,
+                        output_field=models.IntegerField()
+                    )
+                ),
+                respuestas_cero_directivos=models.Sum(
+                    models.Case(
+                        models.When(aplicar_universo_encuesta_persona__tipo_encuesta__codigo='EN0003',
+                                    respuesta__peso=0, then=1),
+                        default=0,
+                        output_field=models.IntegerField()
+                    )
+                ),
+                total_directivos=models.Sum(
+                    models.Case(
+                        models.When(aplicar_universo_encuesta_persona__tipo_encuesta__codigo='EN0003',
+                                    respuesta__peso__gte=1, then=1),
+                        default=0,
+                        output_field=models.IntegerField()
+                    )
+                ),
+                suma_directivos=models.Sum(
+                    models.Case(
+                        models.When(aplicar_universo_encuesta_persona__tipo_encuesta__codigo='EN0003', then='respuesta__peso'),
+                        default=0,
+                        output_field=models.IntegerField()
+                    )
+                )
+            )
+            for r in respuestas_pregunta:
+                print(r)
+                pregunta = get_object_or_404(PreguntaEncuesta, id=r['pregunta'])
+                rpp, rpp_created = ResultadoPreguntaPersona.objects.get_or_create(
+                    resultado_persona=rp,
+                    pregunta=pregunta
+                )
+                respuestas_cero_auto = r['respuestas_cero_autoevaluacion'] if r['respuestas_cero_autoevaluacion'] <= 3 else 3
+                respuestas_cero_pares = r['respuestas_cero_pares'] if r['respuestas_cero_pares'] <= 3 else 3
+                respuestas_cero_directivos = r['respuestas_cero_directivos'] if r['respuestas_cero_directivos'] <= 3 else 3
+
+                total_autoevaluacion = r['total_autoevaluacion'] + respuestas_cero_auto
+                total_pares = (r['total_pares'] + respuestas_cero_pares)
+                total_directivos = r['total_directivos'] + respuestas_cero_directivos
+
+                rpp.promedio_autoevaluacion = r['suma_autoevaluacion'] / total_autoevaluacion if total_autoevaluacion > 0 else 0
+                rpp.promedio_pares = r['suma_pares'] / total_pares if total_pares > 0 else 0
+                rpp.promedio_directivos = r['suma_directivos'] / total_directivos if total_directivos > 0 else 0
+
+                hay_autoevaluacion = True
+                hay_pares = True
+                if rpp.promedio_autoevaluacion == 0:
+                    hay_autoevaluacion = False
+                if rpp.promedio_pares == 0:
+                    hay_pares = False
+
+                print(rpp.promedio_directivos)
+                print(rpp.promedio_pares)
+                print(rpp.promedio_autoevaluacion)
+
+                ponderaciones = self.universo_encuesta.ponderacion_set.all()
+                for ponderacion in ponderaciones:
+                    ponde = ponderacion.ponderacion
+                    print("AQUI")
+                    print(self.universo_encuesta.ponderacion_tipo_encuesta("EN0001"))
+                    if ponderacion.tipo_encuesta.codigo == 'EN0000':
+                        if not hay_pares:
+                            ponde += self.universo_encuesta.ponderacion_tipo_encuesta("EN0001")
+                        rpp.peso_autoevaluacion = rpp.promedio_autoevaluacion * (ponde / 100)
+                    if ponderacion.tipo_encuesta.codigo == 'EN0001':
+                        if not hay_autoevaluacion:
+                            ponde += self.universo_encuesta.ponderacion_tipo_encuesta("EN0000")
+                        rpp.peso_pares = rpp.promedio_pares * (ponde / 100)
+                    if ponderacion.tipo_encuesta.codigo == 'EN0003':
+                        if not hay_pares and not hay_autoevaluacion:
+                            ponde += self.universo_encuesta.ponderacion_tipo_encuesta("EN0000") + self.universo_encuesta.ponderacion_tipo_encuesta("EN0001")
+                        rpp.peso_directivos = rpp.promedio_directivos * (ponde / 100)
+
+                print(rpp.peso_directivos)
+                print(rpp.peso_pares)
+                print(rpp.peso_autoevaluacion)
+
+                rpp.nota = rpp.peso_autoevaluacion + rpp.peso_pares + rpp.peso_directivos
+                rpp.save()
+                notas_preguntas.append(rpp.nota)
+
+            rp.nota = sum(notas_preguntas) / len(notas_preguntas)
+            rp.save()
+
+    def save(self, *args, **kwargs):
+        super(AplicarUniversoEncuestaPersona, self).save(*args, **kwargs)
+        self.calcular_resultados()
+
     def get_absolute_url(self):
         return reverse('evado:aplicar_universo_encuesta_persona_detail', kwargs={'pk': self.pk})
 
@@ -510,3 +748,59 @@ class CorreoUniversoEncuesta(models.Model):
 
     def get_absolute_url(self):
         return reverse('evado:correo_universo_detail', kwargs={'pk': self.pk})
+
+
+class ResultadoPersona(models.Model):
+    persona = models.ForeignKey(Persona, on_delete=models.CASCADE)
+    universo_encuesta = models.ForeignKey('UniversoEncuesta', on_delete=models.CASCADE)
+    nota = models.DecimalField(max_digits=2, decimal_places=1, null=True, blank=True, verbose_name="Nota final")
+
+    @property
+    def nota_dimension_tipoencuesta(self):
+        return self.resultadopreguntapersona_set.all().values(
+            'pregunta__categoria__nombre'
+        ).annotate(
+            promedio_directivos=models.Avg('promedio_directivos'),
+            puntaje_directivos=models.Avg('peso_directivos'),
+            promedio_pares=models.Avg('promedio_pares'),
+            puntaje_pares=models.Avg('peso_pares'),
+            promedio_autoevaluacion=models.Avg('promedio_autoevaluacion'),
+            puntaje_autoevaluacion=models.Avg('peso_autoevaluacion'),
+            nota=models.Avg('nota')
+        )
+
+    @property
+    def get_nivel(self):
+        return self.universo_encuesta.escala_desempeno.nivelar(self.nota)
+
+    def __str__(self):
+        return '{} {}'.format(
+            self.persona,
+            self.universo_encuesta,
+        )
+
+    class Meta:
+        verbose_name = u'Resultado de encuesta de persona'
+        verbose_name_plural = u'Resultados de encuestas de personas'
+
+
+class ResultadoPreguntaPersona(models.Model):
+    resultado_persona = models.ForeignKey('ResultadoPersona', on_delete=models.CASCADE)
+    pregunta = models.ForeignKey('PreguntaEncuesta', on_delete=models.CASCADE)
+    promedio_autoevaluacion = models.DecimalField(max_digits=3, decimal_places=2, null=True, blank=True, verbose_name="Promedio de autoevaluación")
+    peso_autoevaluacion = models.DecimalField(max_digits=3, decimal_places=2, null=True, blank=True, verbose_name="Peso de autoevaluación")
+    promedio_pares = models.DecimalField(max_digits=3, decimal_places=2, null=True, blank=True, verbose_name="Promedio de pares")
+    peso_pares = models.DecimalField(max_digits=3, decimal_places=2, null=True, blank=True, verbose_name="Promedio de pares")
+    promedio_directivos = models.DecimalField(max_digits=3, decimal_places=2, null=True, blank=True, verbose_name="Promedio de directivos")
+    peso_directivos = models.DecimalField(max_digits=3, decimal_places=2, null=True, blank=True, verbose_name="Promedio de directivos")
+    nota = models.DecimalField(max_digits=2, decimal_places=1, null=True, blank=True)
+
+    def __str__(self):
+        return '{} - {}'.format(
+            self.resultado_persona,
+            self.pregunta
+        )
+
+    class Meta:
+        verbose_name = u'Resultado de pregunta de persona'
+        verbose_name_plural = u'Resultados de preguntas de personas'

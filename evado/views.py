@@ -13,9 +13,9 @@ from django.core.exceptions import MultipleObjectsReturned
 from django.core.mail import EmailMultiAlternatives
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.core.validators import validate_email
-from django.db.models import Q, Count, Value, Sum, Case, When, IntegerField
+from django.db.models import Q, Count, Value, Sum, Case, When, IntegerField, Avg, Min, Max
 from django.db.models.functions import Concat
-from django.http import HttpResponse
+from django.http import HttpResponse, FileResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template import Context
 from django.template.loader import get_template
@@ -29,6 +29,7 @@ from django.conf import settings
 from evado.mixins import LoginRequired, SuccessOrErrorMessageMixin
 from evado.forms import *
 from evado.models import *
+from evado.reports import *
 
 
 @login_required
@@ -71,7 +72,6 @@ def home(request):
                 )
             )
         )
-        print(aueps)
         for auep in aueps:
             total_colegios += 1
             encuestas_colegio.append(auep)
@@ -130,7 +130,8 @@ class EncuestaDetailView(LoginRequired, DetailView):
         context = super(EncuestaDetailView, self).get_context_data(**kwargs)
         search = self.request.GET.get('search', None)
         aues = AplicarUniversoEncuestaPersona.objects.filter(universo_encuesta__encuesta=self.object).annotate(
-            nombre_persona=Concat('persona__nombres', Value(' '), 'persona__apellido_paterno', Value(' '), 'persona__apellido_materno')
+            nombre_persona=Concat('persona__nombres', Value(' '), 'persona__apellido_paterno', Value(' '),
+                                  'persona__apellido_materno')
         ).order_by('-finalizado')
         if search:
             if search.lower() in 'pendiente':
@@ -281,14 +282,14 @@ class TipoUniversoEncuestaDeleteView(LoginRequired, DeleteView):
 
 class UniversoEncuestaListView(LoginRequired, ListView):
     model = UniversoEncuesta
-    template_name = 'evado/universo_encuesta_list.html'
+    template_name = 'evado/universo_encuesta/universo_encuesta_list.html'
     search_fields = [('encuesta__titulo', 'icontains')]
     paginate_by = 10
 
 
 class UniversoEncuestaDetailView(LoginRequired, DetailView):
     model = UniversoEncuesta
-    template_name = 'evado/universo_encuesta_detail.html'
+    template_name = 'evado/universo_encuesta/universo_encuesta_detail.html'
     search_fields = [('encuesta_titulo', 'icontains')]
 
     def get_context_data(self, **kwargs):
@@ -296,8 +297,10 @@ class UniversoEncuestaDetailView(LoginRequired, DetailView):
         search = self.request.GET.get('search', None)
         colegio = self.request.GET.get('colegio', None)
         estado = self.request.GET.get('estado', None)
-        personas = self.get_object().itemes_personas.annotate(
-            nombre_persona=Concat('persona__nombres', Value(' '), 'persona__apellido_paterno', Value(' '), 'persona__apellido_materno')
+        universo = self.get_object()
+        personas = universo.itemes_personas.annotate(
+            nombre_persona=Concat('persona__nombres', Value(' '), 'persona__apellido_paterno', Value(' '),
+                                  'persona__apellido_materno')
         )
         context['colegios'] = personas.values(
             'persona__infopersona__colegio').distinct('persona__infopersona__colegio')
@@ -330,14 +333,16 @@ class UniversoEncuestaDetailView(LoginRequired, DetailView):
             elif estado == "0":
                 personas = personas.filter(encuesta_finalizada__isnull=True)
 
-        total_resultados = personas.count()
+        total_personas = personas.count()
+
         page = self.request.GET.get('page')
         personas = paginador(personas, page)
+        context['personas'] = personas
+        context['total_personas'] = total_personas
+
         context['search'] = search
         context['colegio'] = colegio
         context['estado'] = estado
-        context['personas'] = personas
-        context['total_resultados'] = total_resultados
         return context
 
 
@@ -350,10 +355,10 @@ def actualizar_encuestas_universo(request, id_universo):
     return redirect('evado:universo_encuesta_detail', universo.id)
 
 
-class UniversoEncuestaCreateView(LoginRequired, SuccessOrErrorMessageMixin, CreateView,):
+class UniversoEncuestaCreateView(LoginRequired, SuccessOrErrorMessageMixin, CreateView, ):
     model = UniversoEncuesta
     form_class = UniversoEncuestaForm
-    template_name = 'evado/universo_encuesta_create.html'
+    template_name = 'evado/universo_encuesta/universo_encuesta_create.html'
     success_message = "El Universo de Encuestas fue creado satisfactoriamente"
 
     def form_valid(self, form):
@@ -378,7 +383,7 @@ class UniversoEncuestaCreateView(LoginRequired, SuccessOrErrorMessageMixin, Crea
 class UniversoEncuestaUpdateView(LoginRequired, SuccessOrErrorMessageMixin, UpdateView):
     model = UniversoEncuesta
     form_class = UniversoEncuestaForm
-    template_name = 'evado/universo_encuesta_create.html'
+    template_name = 'evado/universo_encuesta/universo_encuesta_create.html'
     success_message = "El Universo de Encuestas fue actualizado satisfactoriamente"
 
     def get_form_kwargs(self):
@@ -404,6 +409,90 @@ class UniversoEncuestaUpdateView(LoginRequired, SuccessOrErrorMessageMixin, Upda
         # Generando encuestas para el universo
         self.object.generar_encuestas_del_universo()
         return super(ModelFormMixin, self).form_valid(form)
+
+
+@login_required
+def resultados_universo_encuesta(request, id_universo):
+    universo_encuesta = get_object_or_404(
+        UniversoEncuesta,
+        id=id_universo
+    )
+    context = {
+        'universo': universo_encuesta,
+    }
+    search = request.GET.get('search', None)
+    colegio = request.GET.get('colegio', None)
+    resultados = universo_encuesta.resultadopersona_set.all().annotate(
+        nombre_persona=Concat('persona__nombres', Value(' '), 'persona__apellido_paterno', Value(' '),
+                              'persona__apellido_materno')
+    )
+    resultados_pregunta = ResultadoPreguntaPersona.objects.filter(
+        resultado_persona__universo_encuesta=universo_encuesta
+    ).annotate(
+        nombre_persona=Concat('resultado_persona__persona__nombres', Value(' '),
+                              'resultado_persona__persona__apellido_paterno', Value(' '),
+                              'resultado_persona__persona__apellido_materno')
+    )
+    context['colegios'] = resultados.values(
+        'persona__infopersona__colegio').distinct('persona__infopersona__colegio')
+    if search:
+        resultados = resultados.filter(
+            Q(nombre_persona__icontains=search) |
+            Q(persona__rut__icontains=search) |
+            Q(persona__infopersona__colegio__icontains=search) |
+            Q(persona__infopersona__fundacion__icontains=search)
+        )
+        resultados_pregunta = resultados_pregunta.filter(
+            Q(nombre_persona__icontains=search) |
+            Q(resultado_persona__persona__rut__icontains=search) |
+            Q(resultado_persona__persona__infopersona__colegio__icontains=search) |
+            Q(resultado_persona__persona__infopersona__fundacion__icontains=search)
+        )
+
+    if colegio:
+        if colegio == "None":
+            resultados = resultados.filter(persona__infopersona__colegio__isnull=True)
+            resultados_pregunta = resultados_pregunta.filter(
+                resultado_persona__persona__infopersona__colegio__isnull=True
+            )
+        else:
+            resultados = resultados.filter(persona__infopersona__colegio__icontains=colegio)
+            resultados_pregunta = resultados_pregunta.filter(
+                resultado_persona__persona__infopersona__colegio__icontains=colegio
+            )
+
+    total_resultados = resultados.count()
+    context['total_resultados'] = total_resultados
+    context['total_colegios'] = resultados.values(
+        'persona__infopersona__colegio').distinct('persona__infopersona__colegio').count()
+    context['total_fundaciones'] = resultados.values(
+        'persona__infopersona__fundacion').distinct('persona__infopersona__fundacion').count()
+    promedio = resultados.aggregate(promedio=Avg('nota'))['promedio']
+    context['promedio'] = promedio
+    context['nivel_desempeno'] = universo_encuesta.escala_desempeno.nivelar(promedio)
+
+    context['dimensiones'] = resultados_pregunta.values('pregunta__categoria__nombre').distinct()
+    data = resultados_pregunta.values(
+        'resultado_persona__persona__infopersona__colegio',
+        'pregunta__categoria__nombre'
+    ).annotate(
+        promedio=Avg('nota')
+    )
+    context['data'] = data
+
+    context['indicadores_grafico'] = data.aggregate(
+        menor=Min('promedio'),
+        mayor=Max('promedio')
+    )
+
+    page = request.GET.get('page')
+    resultados = paginador(resultados, page)
+    context['resultados'] = resultados
+
+    context['search'] = search
+    context['colegio'] = colegio
+    context['show_filters'] = True
+    return render(request, 'evado/universo_encuesta/resultados_universo_encuesta.html', context)
 
 
 def guardar_respuestas(request, encuesta_aplicada, dic):
@@ -542,7 +631,7 @@ def tomar_encuesta(request, hash):
 
     context.update({'todas_las_encuestas': todas_aeu_para_una_persona})
 
-    if datetime.datetime.now().date() > aeu.universo_encuesta.fin:
+    if datetime.now().date() > aeu.universo_encuesta.fin:
         return redirect('evado:encuesta_cerrada', hash)
     if aeu.finalizado:
         return redirect('evado:encuesta_finalizada', hash)
@@ -947,7 +1036,7 @@ def enviar_encuesta(request, id_persona, id_universo, unica=True, conexion=None)
 
 class PeriodoEncuestaListView(LoginRequired, ListView):
     model = PeriodoEncuesta
-    template_name = 'evado/periodo_list.html'
+    template_name = 'evado/periodo_encuesta/periodo_list.html'
     search_fields = [('nombres', 'icontains',), ('apellidos', 'icontains',), ('rut', 'icontains',),
                      ('funcion', 'icontains',), ('email', 'icontains',)]
     paginate_by = 10
@@ -956,19 +1045,19 @@ class PeriodoEncuestaListView(LoginRequired, ListView):
 
 class PeriodoEncuestaDetailView(LoginRequired, DetailView):
     model = PeriodoEncuesta
-    template_name = 'evado/periodo_detail.html'
+    template_name = 'evado/periodo_encuesta/periodo_detail.html'
 
 
 class PeriodoEncuestaUpdateView(LoginRequired, UpdateView):
     model = PeriodoEncuesta
     form_class = PeriodoEncuestaForm
-    template_name = 'evado/periodo_create.html'
+    template_name = 'evado/periodo_encuesta/periodo_create.html'
 
 
 class PeriodoEncuestaCreateView(LoginRequired, CreateView):
     model = PeriodoEncuesta
     form_class = PeriodoEncuestaForm
-    template_name = 'evado/periodo_create.html'
+    template_name = 'evado/periodo_encuesta/periodo_create.html'
 
 
 def cambiar_periodo_activo(request, id_periodo):
@@ -1142,7 +1231,8 @@ def configurar_universo_personas(request):
 
     search = request.GET.get('search', None)
     configs = ConfigurarEncuestaUniversoPersona.objects.all().annotate(
-        nombre_persona=Concat('persona__nombres', Value(' '), 'persona__apellido_paterno', Value(' '), 'persona__apellido_materno')
+        nombre_persona=Concat('persona__nombres', Value(' '), 'persona__apellido_paterno', Value(' '),
+                              'persona__apellido_materno')
     ).order_by('persona', 'tipo_encuesta', 'periodo')
     if search:
         configs = configs.filter(
@@ -1295,19 +1385,19 @@ def export_eup_xls(request):
     font_style.font.bold = True
     columns = [
         'RUT Evaluador',
-       'Nombres Evaluador',
-       'Apellidos Evaluador',
-       'Correo Evaluador',
-       'Funcion Evaluador',
-       'Colegio Evaluador',
-       'Fundacion Evaluador',
-       'RUT Evaluado',
-       'Nombres Evaluado',
-       'Apellidos Evaluado',
-       'Correo Evaluado'
-       'Funcion Evaluado',
-       'Colegio Evaluado',
-       'Fundacion Evaluado',
+        'Nombres Evaluador',
+        'Apellidos Evaluador',
+        'Correo Evaluador',
+        'Funcion Evaluador',
+        'Colegio Evaluador',
+        'Fundacion Evaluador',
+        'RUT Evaluado',
+        'Nombres Evaluado',
+        'Apellidos Evaluado',
+        'Correo Evaluado'
+        'Funcion Evaluado',
+        'Colegio Evaluado',
+        'Fundacion Evaluado',
     ]
 
     for col_num in range(len(columns)):
@@ -1486,10 +1576,89 @@ def import_eup_xls(request):
                             evaluado=e_new
                         )
                         if eup_created:
-                            messages.add_message(request, messages.SUCCESS, 'Se ha guardado la configuración de evaluados')
+                            messages.add_message(request, messages.SUCCESS,
+                                                 'Se ha guardado la configuración de evaluados')
 
             messages.add_message(request, messages.SUCCESS, 'Se ha guardado la configuración de evaluados')
         else:
             messages.add_message(request, messages.WARNING, "El formulario tiene errores, favor revisar")
 
     return redirect('evado:configurar_universo_personas')
+
+
+@login_required
+def descargar_pdf_resultado(request, pk):
+    resultado_persona = get_object_or_404(ResultadoPersona, pk=pk)
+    return pdf_response(resultado_persona)
+
+
+@login_required
+def ver_pdf_resultado(request, pk):
+    resultado_persona = get_object_or_404(ResultadoPersona, pk=pk)
+    pdf = generar_pdf_resultados(resultado_persona)
+    return FileResponse(open('{}'.format(pdf.filename), 'rb'), content_type='application/pdf')
+
+
+@login_required
+def descargar_resultados_colegio(request, id_universo_encusta, colegio):
+    universo = get_object_or_404(
+        UniversoEncuesta,
+        id=id_universo_encusta
+    )
+    resultados = ResultadoPersona.objects.filter(universo_encuesta=universo, persona__infopersona__colegio=colegio)
+
+    return multi_pdf_response(resultados, colegio)
+
+
+@login_required
+def resultados_colegio(request, colegio):
+    context = {}
+    resultados = ResultadoPersona.objects.filter(
+        persona__infopersona__colegio__icontains=colegio
+    )
+    resultados_pregunta = ResultadoPreguntaPersona.objects.filter(
+        resultado_persona__persona__infopersona__colegio__icontains=colegio
+    )
+    context['universos'] = resultados.distinct('universo_encuesta')
+
+    id_universo = request.GET.get('universo', None)
+    if id_universo:
+        universo = get_object_or_404(UniversoEncuesta, id=id_universo)
+    else:
+        universo = resultados.last().universo_encuesta
+
+    resultados = resultados.filter(universo_encuesta=universo)
+    resultados_pregunta = resultados_pregunta.filter(resultado_persona__in=resultados)
+    context['universo'] = universo
+
+    total_resultados = resultados.count()
+    context['total_resultados'] = total_resultados
+    context['total_colegios'] = resultados.values(
+        'persona__infopersona__colegio').distinct('persona__infopersona__colegio').count()
+    context['total_fundaciones'] = resultados.values(
+        'persona__infopersona__fundacion').distinct('persona__infopersona__fundacion').count()
+    promedio = resultados.aggregate(promedio=Avg('nota'))['promedio']
+    context['promedio'] = promedio
+    context['nivel_desempeno'] = resultados.first().universo_encuesta.escala_desempeno.nivelar(promedio)
+
+    context['dimensiones'] = resultados_pregunta.values('pregunta__categoria__nombre').distinct()
+    data = resultados_pregunta.values(
+        'resultado_persona__persona__infopersona__colegio',
+        'pregunta__categoria__nombre'
+    ).annotate(
+        promedio=Avg('nota')
+    )
+    context['data'] = data
+
+    context['indicadores_grafico'] = data.aggregate(
+        menor=Min('promedio'),
+        mayor=Max('promedio')
+    )
+
+    page = request.GET.get('page')
+    resultados = paginador(resultados, page)
+    context['resultados'] = resultados
+    context['colegio'] = colegio
+    context['show_filters'] = False
+
+    return render(request, 'evado/universo_encuesta/resultados_universo_encuesta.html', context)

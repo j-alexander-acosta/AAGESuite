@@ -51,10 +51,14 @@ class UniversoEncuestaForm(forms.ModelForm):
             Fieldset(
                 'Configuración de la encuesta',
                 Div(
-                    Div(Field('encuesta'), css_class="col-md-3"),
-                    Div(Field('tipo_encuesta'), css_class="col-md-3"),
-                    Div(Field('periodo'), css_class="col-md-3"),
-                    Div(Field('activar_campo_comentario'), css_class="col-md-3"),
+                    Div(Field('encuesta'), css_class="col-md-4"),
+                    Div(Field('tipo_encuesta'), css_class="col-md-4"),
+                    Div(Field('periodo'), css_class="col-md-4"),
+                    css_class="row"
+                ),
+                Div(
+                    Div(Field('escala_desempeno'), css_class="col-md-6"),
+                    Div(Field('activar_campo_comentario'), css_class="col-md-6"),
                     css_class="row"
                 ),
                 'contenido_email',

@@ -19,7 +19,7 @@ services:
     env_file:
       - .env
     volumes:
-      - .:/code
+      - .:/webapp
     ports:
       - "8001:8000"
     depends_on:
