@@ -92,7 +92,7 @@ class InfoPersonaAdmin(admin.ModelAdmin):
         'colegio',
         'fundacion'
     )
-    list_filter = ['fundacion', 'funcion', 'colegio']
+    list_filter = ['fundacion', 'colegio', 'funcion']
     search_fields = ['funcion', 'colegio', 'fundacion',
                      'persona__nombres', 'persona__apellido_paterno', 'persona__apellido_materno']
 

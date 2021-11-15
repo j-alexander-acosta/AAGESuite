@@ -185,7 +185,7 @@
                                         </div>
                                     {% elif request.user.perfilusuario.es_director %}
                                         <div class="col-md-4">
-                                            <a class="dropdown-icon-item" href="{% url 'evado:resultados_colegio' request.user.persona.infopersona.colegio %}">
+                                            <a class="dropdown-icon-item" href="{% url 'evado:resultados_colegio' request.user.persona.infopersona.colegio|encrypt_phrase_for_url %}">
                                                 <img src="{% static 'base/img/Evaluación-Docente-Personalizado.png' %}" alt="Evaluación Docente">
                                                 <p class="mb-0 mt-1 font-12 text-muted" style="line-height: 14px">Evaluación Docente</p>
                                             </a>

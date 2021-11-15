@@ -135,7 +135,7 @@
             <h4 class="header-title mb-3">Lista de Resultados
                 {% if colegio %}
                     <div class="btn-group btn-group-sm float-right">
-                        <a type="button" href="{% url 'evado:descargar_resultados_colegio' universo.id colegio %}" class="btn btn-outline-primary">
+                        <a type="button" href="{% url 'evado:descargar_resultados_colegio' universo.id colegio|encrypt_phrase_for_url %}" class="btn btn-outline-primary">
                             <i class="uil-file-download"></i> Descargar todos</a>
                         <a type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" aria-expanded="false"> Cambiar Universo <span class="caret"></span> </a>
                         <div class="dropdown-menu">

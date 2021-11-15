@@ -1,5 +1,5 @@
 {% extends 'base/base.html' %}
-{% load staticfiles %}
+{% load staticfiles rrhh_utils %}
 
 {% block content %}
     <div class="row mt-5">
@@ -41,7 +41,7 @@
                 </div>
             {% elif request.user.perfilusuario.es_director %}
                 <div class="col-md-4 text-center my-3">
-                    <a href="{% url 'evado:resultados_colegio' request.user.persona.infopersona.colegio %}">
+                    <a href="{% url 'evado:resultados_colegio' request.user.persona.infopersona.colegio|encrypt_phrase_for_url %}">
                         <img src="{% static 'base/img/Evaluación-Docente-Personalizado.png' %}" height="80" alt="">
                         <h4 class="font-black-normal text-center">Evaluación Docente</h4>
                     </a>
