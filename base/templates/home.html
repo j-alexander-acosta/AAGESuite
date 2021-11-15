@@ -32,9 +32,16 @@
                 </a>
             </div>
 
-            {% if request.user.perfilusuario.es_director or request.user.is_staff %}
+            {% if request.user.is_staff %}
                 <div class="col-md-4 text-center my-3">
                     <a href="{% url 'evado:home_evado' %}">
+                        <img src="{% static 'base/img/Evaluación-Docente-Personalizado.png' %}" height="80" alt="">
+                        <h4 class="font-black-normal text-center">Evaluación Docente</h4>
+                    </a>
+                </div>
+            {% elif request.user.perfilusuario.es_director %}
+                <div class="col-md-4 text-center my-3">
+                    <a href="{% url 'evado:resultados_colegio' request.user.persona.infopersona.colegio %}">
                         <img src="{% static 'base/img/Evaluación-Docente-Personalizado.png' %}" height="80" alt="">
                         <h4 class="font-black-normal text-center">Evaluación Docente</h4>
                     </a>

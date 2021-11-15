@@ -1,0 +1,282 @@
+{% extends 'evado/universo_encuesta/universo_encuesta_list.html' %}
+{% load staticfiles bootstrap_pagination rrhh_utils %}
+
+{% block title_page %}
+    {% if colegio %}{{ colegio }}{% else %}Universo de Encuestas{% endif %} - Resultados
+{% endblock %}
+
+{% block title %}
+    Resultados {% if colegio %}{{ colegio }}{% else %}{{ universo }} <small>{{ universo.periodo }}</small>{% endif %}
+{% endblock %}
+
+{% block breadcrumb %}
+    {% if not colegio %}
+        <li class="breadcrumb-item"><a href="{% url 'home' %}">Suite AAGE</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'evado:home_evado' %}">Evaluación Docente</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'evado:universo_encuesta_list' %}">Universos de Encuestas</a></li>
+        <li class="breadcrumb-item active">Resultados de Universo de Encuestas</li>
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+    {% if show_filters %}
+        <div class="card">
+            <div class="card-body">
+                <h4 class="header-title mb-3">Filtros</h4>
+                <form role="form" method="GET">
+                    <div class="row">
+                        <div class="col-md-5 px-1">
+                            <select class="select form-control" name="colegio">
+                                <option disabled selected> Seleccione Colegio </option>
+                                {% for colegio in colegios %}
+                                    <option value="{{ colegio.persona__infopersona__colegio }}">{{ colegio.persona__infopersona__colegio }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 pr-1">
+                            <input type="text" class="form-control" name="search" placeholder="Buscar">
+                        </div>
+                        <div class="col-md-1 pl-1">
+                            <button class="btn btn-info" type="submit"><i class="uil-search"></i></button>
+                        </div>
+                    </div>
+                </form>
+                {% if search or colegio %}
+                    <div class="row mt-1">
+                        <div class="px-2">
+                            <a class="small" href="{{ request.path }}">Limpiar Listado</a>
+                        </div>
+                        {% if search %}
+                            <div class="pr-2 small">
+                                <strong>Búsqueda:</strong> <em>{{ search }}</em>
+                            </div>
+                        {% endif %}
+                        {% if colegio %}
+                            <div class="pr-2 small">
+                                <strong>Filtro por colegio:</strong> <em>{{ colegio }}</em>
+                            </div>
+                        {% endif %}
+                        <div class="pr-2 small">
+                            <strong>Total de resultados:</strong> <em>{{ total_resultados }}</em>
+                        </div>
+                    </div>
+                    <p>Los Resultados a continuación presentados, pertenecen directamente a los filtros aplicado</p>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+    <div class="row">
+        <div class="col-xl-3 col-lg-4">
+            <div class="card tilebox-one">
+                <div class="card-body">
+                    <i class="uil uil-building float-right"></i>
+                    <h6 class="text-uppercase mt-0">Total Colegios</h6>
+                    <h2 class="my-2 pt-1" id="active-users-count">{{ total_colegios }}</h2>
+                    <p class="mb-0 text-muted">
+                        <span class="text-nowrap">En {{ total_fundaciones }} Fundaciones</span>
+                    </p>
+                </div> <!-- end card-body-->
+            </div>
+            <!--end card-->
+
+            <div class="card tilebox-one">
+                <div class="card-body">
+                    <i class="uil uil-chart-line float-right"></i>
+                    <h6 class="text-uppercase mt-0">Total Resultados</h6>
+                    <h2 class="my-2 pt-1" id="active-views-count">{{ total_resultados }}</h2>
+                </div> <!-- end card-body-->
+            </div>
+            <!--end card-->
+
+            <div class="card tilebox-one">
+                <div class="card-body">
+                    <i class="uil uil-award float-right"></i>
+                    <h6 class="text-uppercase mt-0">Promedio Final</h6>
+                    <h2 class="my-2 pt-1" id="active-users-count">{{ promedio|floatformat }}</h2>
+                    <p class="mb-0 text-muted">
+                        <span class="text-nowrap">Nivel de desempeño
+                            <span class="{% if promedio < 4 %}text-danger{% else %}text-success{% endif %}">{{ nivel_desempeno }}</span>
+                        </span>
+                    </p>
+                </div> <!-- end card-body-->
+            </div>
+            <!--end card-->
+
+        </div> <!-- end col -->
+
+        <div class="col-xl-9 col-lg-8">
+            <div class="card">
+                <div class="card-body" style="position: relative;">
+                    <h4 class="header-title mb-3">Resultados por Colegio</h4>
+                    <div id="grafico" class="apex-charts mt-3"></div>
+                </div> <!-- end card-->
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        {#        <div class="card-header">#}
+        {##}
+        {#                {% block buttons %}#}
+        {#                    <div class="btn-group btn-group-sm float-right">#}
+        {#                        <a class="btn btn-outline-primary" href="{% url 'evado:universo_encuesta_edit' object.pk %}"#}
+        {#                           data-toggle="tooltip" data-placement="top" title="Editar">#}
+        {#                            <i class="uil-edit"></i></a>#}
+        {#                        <a data-toggle="modal" data-target="#send_mails" class="btn btn-outline-info">#}
+        {#                            <span class="mdi mdi-email-send"></span> Enviar Correos </a>#}
+        {#                        <a class="btn btn-outline-success" href="{% url 'evado:actualizar_encuestas_universo' object.pk %}">#}
+        {#                            <i class="uil-refresh"></i> Actualizar encuestas#}
+        {#                        </a>#}
+        {#                    </div>#}
+        {#                {% endblock %}#}
+        {#        </div>#}
+
+        <div class="card-body">
+            <h4 class="header-title mb-3">Lista de Resultados
+                {% if colegio %}
+                    <div class="btn-group btn-group-sm float-right">
+                        <a type="button" href="{% url 'evado:descargar_resultados_colegio' universo.id colegio %}" class="btn btn-outline-primary">
+                            <i class="uil-file-download"></i> Descargar todos</a>
+                        <a type="button" class="btn btn-warning dropdown-toggle" data-toggle="dropdown" aria-expanded="false"> Cambiar Universo <span class="caret"></span> </a>
+                        <div class="dropdown-menu">
+                            {% for u in universos %}
+                                <a class="dropdown-item" href=".?universo={{ u.universo_encuesta.id }}">{{ u.universo_encuesta }}</a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endif %}
+            </h4>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                    <th>Persona</th>
+                    <th>Desglose por dimensión</th>
+                    <th>Nota</th>
+                    <th class="text-center">Descargar resultados</th>
+                    </thead>
+                    <tbody>
+                    {% for x in resultados %}
+                        <tr>
+                            <td>
+                                {{ x.persona }}
+                                <p class="my-0 small text-muted">{{ x.persona.infopersona.colegio }}</p>
+                                {#                                        <p class="label {% if x.correo_enviado %} text-success {% else %} text-danger {% endif %} mb-0">#}
+                                {#                                            Correo {% if x.correo_enviado %} enviado {% else %} no enviado  {% endif %}#}
+                                {#                                        </p>#}
+                            </td>
+                            <td>
+                                <table class="table-sm">
+                                    <thead>
+                                    <th>Dimensión</th>
+                                    <th>Directivos</th>
+                                    <th>Pares</th>
+                                    <th>Autoevaluación</th>
+                                    <th>Nota</th>
+                                    </thead>
+                                    <tbody>
+                                    {% for dimension in x.nota_dimension_tipoencuesta %}
+                                        <tr>
+                                            <th>{{ dimension.pregunta__categoria__nombre }}</th>
+                                            <td>{{ dimension.puntaje_directivos|floatformat }}</td>
+                                            <td>{{ dimension.puntaje_pares|floatformat }}</td>
+                                            <td>{{ dimension.puntaje_autoevaluacion|floatformat }}</td>
+                                            <td>{{ dimension.nota|floatformat }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </td>
+                            <td>
+                                {{ x.nota }}
+                            </td>
+                            <td class="text-center">
+                                <a href="{% url 'evado:descargar_pdf_resultado' x.pk %}" target="_blank" download>
+                                    <span class="uil-file-download" style="font-size: 50px"></span>
+                                </a>
+                                {% if request.user.perfilusuario.es_admin or request.user.is_staff %}
+                                    <a href="{% url 'evado:ver_pdf_resultado' x.pk %}" target="_blank">
+                                        <span class="uil-eye" style="font-size: 50px"></span>
+                                    </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% bootstrap_paginate resultados range=5 show_first_last="true" %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+    {#    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>#}
+    <script src="{% static 'assets/js/vendor/apexcharts.min.js' %}"></script>
+    <script>
+        let options = {
+            chart: {
+                height: 375,
+                type: 'line'
+            },
+            series: [
+                {% regroup data by resultado_persona__persona__infopersona__colegio as colegios %}
+
+                {% for colegio in colegios %}
+                    {
+                        name: '{{ colegio.grouper }}',
+                        data: [
+                            {% for c in colegio.list %}
+                                {{ c.promedio|floatformat }},
+                            {% endfor %}
+                        ]
+                    },
+                {% endfor %}
+            ],
+            xaxis: {
+                categories: [
+                    {% for d in dimensiones %}
+                        '{{ d.pregunta__categoria__nombre }}',
+                    {% endfor %}
+                ],
+                tickPlacement: 'between',
+                title: {
+                    text: "Dimensiones",
+                    offsetX: 0,
+                    offsetY: 0,
+                    style: {
+                        color: undefined,
+                        fontSize: '12px',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        fontWeight: 600,
+                        cssClass: 'apexcharts-xaxis-title',
+                    },
+                },
+            },
+            stroke: {
+                curve: 'smooth',
+            },
+            yaxis: {
+                min: {{ indicadores_grafico.menor|add:"-1" }},
+                max: {{ indicadores_grafico.mayor|add:"1" }},
+                title: {
+                    text: "Promedio",
+                    rotate: -90,
+                    offsetX: 0,
+                    offsetY: 0,
+                    style: {
+                        color: undefined,
+                        fontSize: '12px',
+                        fontFamily: 'Helvetica, Arial, sans-serif',
+                        fontWeight: 600,
+                        cssClass: 'apexcharts-yaxis-title',
+                    },
+                },
+            },
+        }
+
+        let chart = new ApexCharts(document.querySelector("#grafico"), options);
+
+        chart.render();
+    </script>
+
+{% endblock %}
